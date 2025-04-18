@@ -1,0 +1,25 @@
+TimeSeries.NET - Custom Non-Commercial License
+Copyright (c) 2025 Joshua Chukwu
+
+Permission is hereby granted, free of charge, to any person or organization obtaining a copy of this software and associated documentation files (the "Software"), to use, copy, modify, and distribute the Software for non-commercial purposes, subject to the following conditions:
+
+1. Non-Commercial Use Only:
+   The Software may be used freely for personal, academic, research, or educational purposes. Any use of the Software for commercial purposes, including but not limited to internal business operations, SaaS, resale, or inclusion in proprietary products, is strictly prohibited without a valid commercial license, except as described in Section 2.
+
+2. Contributor Exception:
+   Individuals or organizations who have made meaningful contributions to the Software (as determined by the repository maintainers) are granted a royalty-free license to use the Software for commercial purposes, including in proprietary or for-profit products.
+
+3. Commercial Licensing:
+   For all other commercial uses, a separate commercial license must be obtained from the author.  
+   Please contact:  
+   **Joshua Chukwu**  
+   Email: jchukwu61@gmail.com  
+   LinkedIn: https://www.linkedin.com/in/joshua-chukwu-653196192/
+
+4. Attribution:
+   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+5. No Warranty:
+   The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement.
+
+By using the Software, you agree to be bound by the terms of this license.
