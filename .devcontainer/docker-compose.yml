@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  timeseries_dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../..:/workspace:cached
+    user: vscode
+    tty: true
+    command: sleep infinity

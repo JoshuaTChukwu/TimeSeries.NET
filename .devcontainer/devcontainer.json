@@ -1,0 +1,26 @@
+{
+    "name": "TimeSeries.NET Dev Container",
+    "dockerComposeFile": "docker-compose.yml",
+  "service": "timeseries_dev",
+  "workspaceFolder": "/workspace",
+    "customizations": {
+      "vscode": {
+        "settings": {
+          "terminal.integrated.defaultProfile.linux": "bash",
+          "editor.tabSize": 4,
+                "editor.formatOnSave": true,
+                "remote.restoreForwardedPorts": false
+        },
+        "extensions": [
+      "ms-dotnettools.csdevkit",
+      "ms-azuretools.vscode-docker",
+      "eamodio.gitlens"
+    ]
+      }
+    },
+    
+    "postCreateCommand": "dotnet restore",
+    "forwardPorts": [],
+    "remoteUser": "vscode"
+  }
+  
