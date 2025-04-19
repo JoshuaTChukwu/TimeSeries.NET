@@ -1,8 +1,8 @@
 {
     "name": "TimeSeries.NET Dev Container",
     "dockerComposeFile": "docker-compose.yml",
-  "service": "dev",
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "service": "timeseries_dev",
+  "workspaceFolder": "/workspace",
     "customizations": {
       "vscode": {
         "settings": {
@@ -13,6 +13,7 @@
         },
         "extensions": [
       "ms-dotnettools.csdevkit",
+      "ms-azuretools.vscode-docker",
       "eamodio.gitlens"
     ]
       }
