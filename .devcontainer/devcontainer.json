@@ -2,7 +2,7 @@
     "name": "TimeSeries.NET Dev Container",
     "dockerComposeFile": "docker-compose.yml",
   "service": "timeseries_dev",
-  "workspaceFolder": "/workspace",
+  "workspaceFolder": "/workspace/${localWorkspaceFolderBasename}",
     "customizations": {
       "vscode": {
         "settings": {
