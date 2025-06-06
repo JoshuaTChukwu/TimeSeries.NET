@@ -82,8 +82,10 @@ public static class Differencing
     {
         if (lag < 1)
             throw new ArgumentException("Lag must be greater than 0.");
-        if (differencedData == null || originalData == null)
-            throw new ArgumentNullException("Inputs cannot be null.");
+        if (differencedData == null)
+            throw new ArgumentNullException(nameof(differencedData));
+        if (originalData == null)
+            throw new ArgumentNullException(nameof(originalData));
         if (originalData.Length - startIndex < lag)
             throw new ArgumentException("Not enough original data to restore.");
         if (differencedData.Length + lag + startIndex > originalData.Length && validateAgainstOriginal)
