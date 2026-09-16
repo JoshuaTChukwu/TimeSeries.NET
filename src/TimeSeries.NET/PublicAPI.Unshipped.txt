@@ -514,3 +514,6 @@ TimeSeries.FitManyOptions.KeysInFlight.get -> int
 TimeSeries.FitManyOptions.KeysInFlight.init -> void
 TimeSeries.FitManyOptions.Validate() -> void
 TimeSeries.Statistics.ChiSquaredDistribution
+TimeSeries.ArimaCandidate.IsAdmissible.get -> bool
+TimeSeries.AutoArimaOptions.RequireAdmissible.get -> bool
+TimeSeries.AutoArimaOptions.RequireAdmissible.init -> void

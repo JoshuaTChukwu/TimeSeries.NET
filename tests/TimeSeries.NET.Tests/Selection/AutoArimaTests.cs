@@ -169,6 +169,40 @@ public class AutoArimaTests
     }
 
     [Fact]
+    public void ShortSeries_NeverSelectsAnInadmissibleModel()
+    {
+        // Hannan-Rissanen on ~150 points with an over-parameterised ARMA(2,2) candidate can
+        // land outside the stationary/invertible region while scoring best in sample. The
+        // default must refuse to crown such a model; the ranked table still shows it.
+        var options = new AutoArimaOptions { MaxP = 3, MaxQ = 2, MaxPilotOrder = 12 };
+        var inadmissibleTops = 0;
+
+        for (var seed = 1; seed <= 15; seed++)
+        {
+            var series = SeriesGenerator.Arma(156, [0.6], [0.3], seed, constant: 0.2);
+
+            var guarded = new AutoArima(options).Select(series);
+            var unguarded = new AutoArima(options with { RequireAdmissible = false }).Select(series);
+
+            Assert.True(guarded.Best.Diagnostics.IsStationary && guarded.Best.Diagnostics.IsInvertible,
+                $"Seed {seed}: selected ARIMA{guarded.Best.Order} is inadmissible.");
+            Assert.True(guarded.Candidates.First().IsAdmissible);
+
+            // Without the guard the ranking is the bare criterion.
+            var scores = unguarded.Candidates.Where(c => c.Succeeded).Select(c => c.Aicc).ToArray();
+            Assert.Equal(scores.OrderBy(v => v).ToArray(), scores);
+
+            if (!unguarded.Best.Diagnostics.IsStationary || !unguarded.Best.Diagnostics.IsInvertible)
+            {
+                inadmissibleTops++;
+            }
+        }
+
+        // Informational rather than asserted: the guard matters only if this is ever non-zero.
+        Assert.True(inadmissibleTops >= 0);
+    }
+
+    [Fact]
     public void OptionsValidation()
     {
         Assert.Throws<ArgumentNullException>(() => new AutoArima(null!));

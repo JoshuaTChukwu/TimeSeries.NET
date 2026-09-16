@@ -230,8 +230,11 @@ public sealed class AutoArima
             }
         }
 
+        // Admissible fits first when required: a non-stationary or non-invertible candidate
+        // may score best in sample and still forecast nonsense.
         var ranked = candidates
             .OrderBy(c => c.Succeeded ? 0 : 1)
+            .ThenBy(c => Options.RequireAdmissible && c.Succeeded && !c.IsAdmissible ? 1 : 0)
             .ThenBy(c => c.Succeeded && double.IsNaN(c.Score(Options.Criterion)) ? 1 : 0)
             .ThenBy(c => c.Score(Options.Criterion))
             .ThenBy(c => c.Order.P + c.Order.Q)

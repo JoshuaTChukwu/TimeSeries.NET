@@ -28,6 +28,12 @@ public sealed class ArimaCandidate
     /// <summary>True when <see cref="Fit"/> is present.</summary>
     public bool Succeeded => Fit is not null;
 
+    /// <summary>
+    /// True when the fit is both stationary and invertible — the only kind whose
+    /// forecasts and intervals mean what they claim. False for a failed candidate.
+    /// </summary>
+    public bool IsAdmissible => Fit is { Diagnostics: { IsStationary: true, IsInvertible: true } };
+
     /// <summary>The candidate's AIC, or NaN when it failed.</summary>
     public double Aic => Fit?.Diagnostics.Aic ?? double.NaN;
 

@@ -73,6 +73,15 @@ public sealed record AutoArimaOptions
     /// <summary>Residual autocorrelations examined by the Ljung-Box test on every candidate. Default 10; zero disables.</summary>
     public int LjungBoxLags { get; init; } = 10;
 
+    /// <summary>
+    /// Whether a candidate must be stationary and invertible to win. Default true, as in
+    /// auto.arima. Hannan-Rissanen on a short series can land an over-parameterised
+    /// candidate outside the admissible region; its in-sample criterion can still look
+    /// best while its forecasts diverge. With this on, admissible candidates rank ahead
+    /// of inadmissible ones whatever their criterion; the ranked table still lists all.
+    /// </summary>
+    public bool RequireAdmissible { get; init; } = true;
+
     /// <summary>Checks the options.</summary>
     /// <exception cref="ArgumentOutOfRangeException">A bound is negative, a list is empty, or the significance level is unsupported.</exception>
     public void Validate()
