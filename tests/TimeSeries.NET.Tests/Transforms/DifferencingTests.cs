@@ -1,8 +1,8 @@
 using Xunit;
-using TimeSeries.Core.Math;
+using TimeSeries.Transforms;
 using TimeSeries.Tests.TestUtils;
 
-namespace TimeSeries.Tests.Math
+namespace TimeSeries.Tests.Transforms
 {
     public class DifferencingTests
     {

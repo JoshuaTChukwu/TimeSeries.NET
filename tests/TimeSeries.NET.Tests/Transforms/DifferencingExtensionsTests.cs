@@ -1,7 +1,7 @@
 using Xunit;
-using TimeSeries.Core.Math;
+using TimeSeries.Transforms;
 
-namespace TimeSeries.Tests.Math
+namespace TimeSeries.Tests.Transforms
 {
     public class DifferencingExtensionsTests
     {

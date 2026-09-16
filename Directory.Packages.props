@@ -1,0 +1,25 @@
+<Project>
+
+  <!-- Central package version management (architecture §9). -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      netstandard2.0 only. Decision 1 was taken in favour of multi-targeting for
+      .NET Framework, which costs this reference; the net8.0 build takes nothing.
+      See README "Dependencies".
+    -->
+    <PackageVersion Include="System.Memory" Version="4.5.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Test tier. -->
+    <PackageVersion Include="coverlet.collector" Version="6.0.2" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageVersion Include="xunit" Version="2.9.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+</Project>

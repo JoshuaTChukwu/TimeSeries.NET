@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>TimeSeries</RootNamespace>
+    <AssemblyName>TimeSeries.NET</AssemblyName>
+    <PackageId>TimeSeries.NET</PackageId>
+    <Description>
+      Dependency-free ARIMA and ARIMAX forecasting for .NET, fitted either from memory
+      or streamed directly from your own database. Nothing is hosted; no data leaves
+      your process.
+    </Description>
+  </PropertyGroup>
+
+  <!--
+    Zero dependencies on net8.0 (architecture ADR-002, enforced by a reflection test).
+    The netstandard2.0 leg needs Span/Memory, which are in the BCL from .NET Core 2.1
+    onwards but must be referenced explicitly for .NET Framework.
+  -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Memory" />
+  </ItemGroup>
+
+
+</Project>

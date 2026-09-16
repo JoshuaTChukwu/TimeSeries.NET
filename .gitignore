@@ -402,3 +402,6 @@ FodyWeavers.xsd
 
 # File that pops up when devcontainer failes to open
 core
+
+# macOS
+.DS_Store
