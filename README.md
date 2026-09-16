@@ -35,10 +35,13 @@ summary and will lag behind them.
 | `net8.0` | **None.** Asserted by a unit test over `GetReferencedAssemblies()`. |
 | `netstandard2.0` | `System.Memory`, `System.Threading.Tasks.Extensions`, `Microsoft.Bcl.AsyncInterfaces` — `Span<T>`, `ValueTask` and `IAsyncEnumerable` for .NET Framework 4.6.1+. All Microsoft-owned. |
 
-The core package will never take a third-party reference. Database drivers live in
-satellite packages (`TimeSeries.NET.Data` over `DbDataReader`, which covers Npgsql,
-SqlClient, Sqlite, MySqlConnector, Oracle, ClickHouse and DuckDB without referencing any
-of them).
+The core package will never take a third-party reference. Satellites:
+
+| Package | Depends on |
+| --- | --- |
+| `TimeSeries.NET.Data` | Nothing beyond the BCL — `System.Data.Common` covers Npgsql, SqlClient, Sqlite, MySqlConnector, Oracle, ClickHouse and DuckDB without referencing any of them. |
+| `TimeSeries.NET.Data.MongoDb` | `MongoDB.Driver`. The one third-party reference in the set, which is why it is its own package. |
+| `TimeSeries.NET.Extensions.DependencyInjection` | `Microsoft.Extensions.DependencyInjection.Abstractions`. |
 
 ---
 
@@ -50,51 +53,96 @@ of them).
 
 ## 🧪 Example usage
 
-The API below is implemented on the `main` line of work (M1–M6); packaging (M7) is
-what remains before a NuGet release.
-
-One class covers both ARIMA and ARIMAX — they are the same model, and exogenous
-regressors are simply optional. The estimator is stateless and the fit it returns is
-immutable, holds no data, and serialises to a few hundred bytes.
+A complete program — this exact file is compiled and run against the packed packages as
+part of the release check. It needs `TimeSeries.NET`, `TimeSeries.NET.Data` and, for the
+SQLite part, `Microsoft.Data.Sqlite`.
 
 ```csharp
+using Microsoft.Data.Sqlite;
+using TimeSeries;
+using TimeSeries.Data;
+
+// A synthetic series: a random walk with drift, the kind of thing d = 1 is for.
+var random = new Random(42);
+var series = new double[2_000];
+for (var t = 1; t < series.Length; t++)
+    series[t] = series[t - 1] + 0.1 + random.NextDouble() - 0.5;
+
+// One class covers ARIMA and ARIMAX. The estimator is stateless; the fit is immutable.
 var model = new ArimaModel(new ArimaOptions
 {
-    Order = new(2, 1, 1),
-    Frequency = SeriesFrequency.BusinessDaily,
+    Order = new(1, 1, 1),
+    Frequency = SeriesFrequency.Monthly,
 });
 
-// In memory, for ordinary data.
-ArimaFit fit = model.Fit(closingPrices);
+ArimaFit fit = model.Fit(series);
+Console.WriteLine($"phi={fit.AutoRegressive.Span[0]:F3} theta={fit.MovingAverage.Span[0]:F3} drift={fit.Intercept:F3}");
 
-// Or streamed from your own database, never materialising the series.
-// TimeSeries.NET.Data reaches any ADO.NET provider through DbDataReader.
+// Forecast two years ahead. Intervals are never optional.
+ForecastResult next = fit.Forecast(ForecastHorizon.Years(2));
+Console.WriteLine($"h=1: {next.Mean.Span[0]:F2} [{next.Lower.Span[0]:F2}, {next.Upper.Span[0]:F2}]");
+Console.WriteLine($"h=24: {next.Mean.Span[23]:F2} [{next.Lower.Span[23]:F2}, {next.Upper.Span[23]:F2}]");
+
+// Total over the next year, with a standard error that includes the covariance between steps.
+ForecastAggregate year = next.Sum(1, 12);
+Console.WriteLine($"sum(h=1..12) = {year.Mean:F1} ± {year.StandardError:F1}");
+
+// Let the library choose the order: d by a stationarity test, (p, q) by AICc, one pass.
+ArimaSelection selection = new AutoArima(new AutoArimaOptions { MaxP = 3, MaxQ = 2, MaxPilotOrder = 12 }).Select(series);
+Console.WriteLine($"auto: ARIMA{selection.Best.Order} (KPSS at d=0: {selection.Differencing[0].Kpss.Statistic:F2})");
+
+// The same fit, streamed from a database through DbDataReader. Nothing is materialised.
+var connectionString = "Data Source=file:readme?mode=memory&cache=shared";
+using var keepAlive = new SqliteConnection(connectionString);
+keepAlive.Open();
+using (var create = keepAlive.CreateCommand())
+{
+    create.CommandText = "CREATE TABLE prices (ts TEXT, close REAL)";
+    create.ExecuteNonQuery();
+    using var insert = keepAlive.CreateCommand();
+    insert.CommandText = "INSERT INTO prices VALUES (@ts, @close)";
+    var ts = insert.Parameters.Add("@ts", SqliteType.Text);
+    var close = insert.Parameters.Add("@close", SqliteType.Real);
+    var day = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+    for (var t = 0; t < series.Length; t++)
+    {
+        ts.Value = day.AddDays(t).ToString("O");
+        close.Value = series[t];
+        insert.ExecuteNonQuery();
+    }
+}
+
 var source = new DbTimeSeriesSource(
-    () => new NpgsqlConnection(connectionString),
+    () => new SqliteConnection(connectionString),
     new DbSeriesQuery
     {
-        CommandText = "SELECT ts, close_px, vix FROM market.daily_bars WHERE symbol = @symbol ORDER BY ts",
-        ValueColumn = "close_px",
-        ExogenousColumns = ["vix"],
+        CommandText = "SELECT ts, close FROM prices WHERE ts >= @from ORDER BY ts",
+        ValueColumn = "close",
         TimeColumn = "ts",
-        Parameters = { ["symbol"] = "EURUSD" },
+        Parameters = { ["@from"] = "2020-01-01" },
     },
-    new DbSourceOptions { ExpectedStep = TimeSpan.FromDays(1), MaxGap = TimeSpan.FromDays(4) });
+    new DbSourceOptions { ExpectedStep = TimeSpan.FromDays(1) });   // a gap throws, by default
 
-ArimaFit streamed = await model.FitAsync(source, ct);
+ArimaFit streamed = await model.FitAsync(source);
+Console.WriteLine($"streamed == in-memory: {streamed.AutoRegressive.Span[0] == fit.AutoRegressive.Span[0]}");
 
-// A population of series in one ordered scan — set KeyColumn and ORDER BY key, ts.
-await foreach (KeyedArimaFit perAccount in model.FitManyAsync(groupedSource, ct)) { /* ... */ }
+// New observations land later: fold them into saved state. Exactly equal to a batch refit.
+var incremental = new IncrementalArima(model.Options);
+incremental.Fold(series.AsSpan(0, 1_500));
+using var state = new MemoryStream();
+incremental.SaveTo(state);
 
-// New observations land: fold them into saved state. Exactly equal to a batch refit.
-var incremental = IncrementalArima.Restore(savedState, model.Options);
-await incremental.FoldAsync(newRowsSource, ct);
-ArimaFit refreshed = incremental.Solve();
-
-ForecastResult next = fit.Forecast(ForecastHorizon.Years(2), futureRegressors);
-
-Console.WriteLine($"{next.Mean.Span[0]:F4} [{next.Lower.Span[0]:F4}, {next.Upper.Span[0]:F4}]");
+state.Position = 0;
+var resumed = IncrementalArima.Restore(state, model.Options);
+resumed.Fold(series.AsSpan(1_500));
+Console.WriteLine($"incremental == batch: {resumed.Solve().AutoRegressive.Span[0] == fit.AutoRegressive.Span[0]}");
 ```
+
+Populations of series — one model per account, product, or client — come from the same
+scan ordered by key then time: set `KeyColumn` on the query and use
+`model.FitManyAsync(source)`. MongoDB collections are read the same way through
+`TimeSeries.NET.Data.MongoDb`; `TimeSeries.NET.Extensions.DependencyInjection` adds
+`services.AddTimeSeries()`, `AddArimaModel(options)` and `AddAutoArima(options)`.
 
 Prediction intervals are not optional. An ARIMA point forecast converges to its drift
 line within a handful of steps, so at a two-year horizon the mean path is a straight line
@@ -102,6 +150,14 @@ and the interval width is the entire content of the forecast. Forecast errors at
 different steps are correlated, so to aggregate over a window — total sales next quarter
 — use `ForecastResult.Sum(start, count)`, which carries the covariance, rather than
 adding per-step variances.
+
+### Order selection
+
+`AutoArima` runs the whole grid on one pass. Differencing is chosen by a KPSS
+stationarity test — information criteria cannot compare models fitted to differently
+differenced series — and then `(p, q)` are ranked by AICc (or AIC/BIC) at that fixed
+`d`, where every candidate is fitted to the same rows. The result carries the full
+ranked table and every stationarity test, so the choice is inspectable.
 
 ### Model form
 
@@ -141,7 +197,8 @@ its own acceptance criteria.
 - [x] **M5** — Forecasting: ψ-weights, integration, prediction intervals
 - [x] **M6** — Streaming: batched cursor, `DbTimeSeriesSource`, multi-series scan,
       incremental fold
-- [ ] **M7** — `AutoArima` grid search, MongoDB source, DI extensions, NuGet packaging
+- [x] **M7** — `AutoArima` grid search, MongoDB source, DI extensions, NuGet packaging
+- [ ] Publish `0.1.0-preview.1` to NuGet.org
 - [ ] Additional models: ETS, Holt–Winters
 
 ### Why one pass

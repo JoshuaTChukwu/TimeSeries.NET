@@ -1,0 +1,16 @@
+#nullable enable
+static TimeSeries.Extensions.DependencyInjection.TimeSeriesServiceCollectionExtensions.AddArimaModel(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, TimeSeries.ArimaOptions! options) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static TimeSeries.Extensions.DependencyInjection.TimeSeriesServiceCollectionExtensions.AddAutoArima(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, TimeSeries.AutoArimaOptions! options) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static TimeSeries.Extensions.DependencyInjection.TimeSeriesServiceCollectionExtensions.AddTimeSeries(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+TimeSeries.Extensions.DependencyInjection.ArimaModelFactory
+TimeSeries.Extensions.DependencyInjection.ArimaModelFactory.ArimaModelFactory() -> void
+TimeSeries.Extensions.DependencyInjection.ArimaModelFactory.Create(TimeSeries.ArimaOptions! options) -> TimeSeries.ArimaModel!
+TimeSeries.Extensions.DependencyInjection.ArimaModelFactory.CreateAutoArima(TimeSeries.AutoArimaOptions! options) -> TimeSeries.AutoArima!
+TimeSeries.Extensions.DependencyInjection.ArimaModelFactory.CreateIncremental(TimeSeries.ArimaOptions! options, int regressorCount = 0) -> TimeSeries.IncrementalArima!
+TimeSeries.Extensions.DependencyInjection.ArimaModelFactory.RestoreIncremental(System.IO.Stream! state, TimeSeries.ArimaOptions! options) -> TimeSeries.IncrementalArima!
+TimeSeries.Extensions.DependencyInjection.IArimaModelFactory
+TimeSeries.Extensions.DependencyInjection.IArimaModelFactory.Create(TimeSeries.ArimaOptions! options) -> TimeSeries.ArimaModel!
+TimeSeries.Extensions.DependencyInjection.IArimaModelFactory.CreateAutoArima(TimeSeries.AutoArimaOptions! options) -> TimeSeries.AutoArima!
+TimeSeries.Extensions.DependencyInjection.IArimaModelFactory.CreateIncremental(TimeSeries.ArimaOptions! options, int regressorCount = 0) -> TimeSeries.IncrementalArima!
+TimeSeries.Extensions.DependencyInjection.IArimaModelFactory.RestoreIncremental(System.IO.Stream! state, TimeSeries.ArimaOptions! options) -> TimeSeries.IncrementalArima!
+TimeSeries.Extensions.DependencyInjection.TimeSeriesServiceCollectionExtensions

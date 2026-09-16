@@ -1,0 +1,30 @@
+#nullable enable
+TimeSeries.Data.DbSeriesCursor
+TimeSeries.Data.DbSeriesCursor.Current.get -> TimeSeries.Data.SeriesBatch
+TimeSeries.Data.DbSeriesCursor.DisposeAsync() -> System.Threading.Tasks.ValueTask
+TimeSeries.Data.DbSeriesCursor.ReadAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
+TimeSeries.Data.DbSeriesCursor.RowsRead.get -> long
+TimeSeries.Data.DbSeriesQuery
+TimeSeries.Data.DbSeriesQuery.BatchSize.get -> int
+TimeSeries.Data.DbSeriesQuery.BatchSize.init -> void
+TimeSeries.Data.DbSeriesQuery.CommandText.get -> string!
+TimeSeries.Data.DbSeriesQuery.CommandText.init -> void
+TimeSeries.Data.DbSeriesQuery.CommandTimeoutSeconds.get -> int?
+TimeSeries.Data.DbSeriesQuery.CommandTimeoutSeconds.init -> void
+TimeSeries.Data.DbSeriesQuery.ExogenousColumns.get -> System.Collections.Generic.IReadOnlyList<string!>!
+TimeSeries.Data.DbSeriesQuery.ExogenousColumns.init -> void
+TimeSeries.Data.DbSeriesQuery.KeyColumn.get -> string?
+TimeSeries.Data.DbSeriesQuery.KeyColumn.init -> void
+TimeSeries.Data.DbSeriesQuery.Parameters.get -> System.Collections.Generic.IDictionary<string!, object?>!
+TimeSeries.Data.DbSeriesQuery.TimeColumn.get -> string?
+TimeSeries.Data.DbSeriesQuery.TimeColumn.init -> void
+TimeSeries.Data.DbSeriesQuery.Validate() -> void
+TimeSeries.Data.DbSeriesQuery.ValueColumn.get -> string!
+TimeSeries.Data.DbSeriesQuery.ValueColumn.init -> void
+TimeSeries.Data.DbTimeSeriesSource
+TimeSeries.Data.DbTimeSeriesSource.DbTimeSeriesSource(System.Func<System.Data.Common.DbConnection!>! connectionFactory, TimeSeries.Data.DbSeriesQuery! query, TimeSeries.Data.DbSourceOptions? options = null) -> void
+TimeSeries.Data.DbTimeSeriesSource.IsGrouped.get -> bool
+TimeSeries.Data.DbTimeSeriesSource.OpenCursorAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<TimeSeries.Data.DbSeriesCursor!>
+TimeSeries.Data.DbTimeSeriesSource.Options.get -> TimeSeries.Data.DbSourceOptions!
+TimeSeries.Data.DbTimeSeriesSource.Query.get -> TimeSeries.Data.DbSeriesQuery!
+TimeSeries.Data.DbTimeSeriesSource.RegressorCount.get -> int

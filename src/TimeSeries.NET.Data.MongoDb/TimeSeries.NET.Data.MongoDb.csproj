@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>TimeSeries.Data.MongoDb</RootNamespace>
+    <AssemblyName>TimeSeries.NET.Data.MongoDb</AssemblyName>
+    <PackageId>TimeSeries.NET.Data.MongoDb</PackageId>
+    <Description>
+      Streams a time series into TimeSeries.NET from a MongoDB collection — a find with a
+      sort, or an aggregation pipeline — through the driver's batched async cursor. The only
+      package in the set that references a third-party driver, which is why it is its own.
+     Licensed for non-commercial use; contributors and commercial licensees may use it commercially. See LICENSE.txt.
+    </Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TimeSeries.NET\TimeSeries.NET.csproj" />
+    <PackageReference Include="MongoDB.Driver" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TimeSeries.NET.Data.MongoDb.Tests" />
+  </ItemGroup>
+
+</Project>

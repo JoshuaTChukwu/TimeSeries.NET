@@ -1,0 +1,19 @@
+# Analyzer policy for the shippable packages.
+root = false
+
+[*.cs]
+# RS0016 / RS0017: every public symbol must be declared in PublicAPI.*.txt, and nothing
+# declared may vanish. This is the guarantee architecture §9 asks for; keep as errors.
+dotnet_diagnostic.RS0016.severity = error
+dotnet_diagnostic.RS0017.severity = error
+
+# RS0026 / RS0027 police how optional parameters may be *added* later so that adding an
+# overload cannot break existing call sites. The overload pairs they flag here —
+# FitAsync(source, ct = default) / FitAsync(enumerable, ct = default),
+# Forecast(horizon, options = null) / Forecast(horizon, future, options = null), and the
+# legacy Difference(data, lag = 1, isCumulative = false) — differ in a required leading
+# parameter type, so the only call they can make ambiguous is a bare null literal. The
+# public API is fixed by the specification (§3.2, §3.3); the rules stay visible in the
+# IDE as suggestions rather than failing the build.
+dotnet_diagnostic.RS0026.severity = suggestion
+dotnet_diagnostic.RS0027.severity = suggestion

@@ -1,6 +1,11 @@
 namespace TimeSeries.Data;
 
-/// <summary>How a <see cref="DbTimeSeriesSource"/> treats spacing and ordering.</summary>
+/// <summary>
+/// How a database-backed source treats spacing and ordering. Shared by every adapter —
+/// SQL through <c>DbDataReader</c>, MongoDB, and any contributed source that assembles its
+/// rows through <see cref="SeriesBatchAssembler"/> — so a gap means the same thing
+/// whichever store the series lives in.
+/// </summary>
 public sealed record DbSourceOptions
 {
     /// <summary>The defaults: gaps throw, key order is validated.</summary>

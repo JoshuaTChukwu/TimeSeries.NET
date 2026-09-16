@@ -45,13 +45,8 @@ public sealed class DbTimeSeriesSource : ITimeSeriesSource, IGroupedTimeSeriesSo
 
         Query.Validate();
 
-        if (Query.TimeColumn is not null && Options.Gaps != GapPolicy.Throw && Options.Step is null)
-        {
-            throw new ArgumentException(
-                $"GapPolicy.{Options.Gaps} needs to know how many observations are missing, so ExpectedStep " +
-                "(or ExpectedNumericStep) must be set.",
-                nameof(options));
-        }
+        // Validate the gap configuration now rather than at first read.
+        using var probe = new SeriesBatchAssembler(RegressorCount, Query.BatchSize, Options, IsGrouped, Query.TimeColumn is not null, timeIsTicks: true);
     }
 
     /// <summary>The query and column roles.</summary>

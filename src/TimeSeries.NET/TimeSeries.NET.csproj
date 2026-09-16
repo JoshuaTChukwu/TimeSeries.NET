@@ -8,6 +8,7 @@
       Dependency-free ARIMA and ARIMAX forecasting for .NET, fitted either from memory
       or streamed directly from your own database. Nothing is hosted; no data leaves
       your process.
+     Licensed for non-commercial use; contributors and commercial licensees may use it commercially. See LICENSE.txt.
     </Description>
   </PropertyGroup>
 

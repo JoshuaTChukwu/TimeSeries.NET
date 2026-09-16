@@ -8,6 +8,7 @@
       Streams a time series into TimeSeries.NET straight from any ADO.NET provider —
       Npgsql, SqlClient, Sqlite, MySqlConnector, Oracle, ClickHouse, DuckDB — through
       System.Data.Common.DbDataReader. No provider is referenced; you already have yours.
+     Licensed for non-commercial use; contributors and commercial licensees may use it commercially. See LICENSE.txt.
     </Description>
   </PropertyGroup>
 

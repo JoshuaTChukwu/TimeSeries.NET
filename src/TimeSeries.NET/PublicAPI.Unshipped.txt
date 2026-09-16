@@ -1,0 +1,492 @@
+#nullable enable
+override TimeSeries.ArimaOrder.ToString() -> string!
+override TimeSeries.FitWindow.ToString() -> string!
+override TimeSeries.ForecastHorizon.ToString() -> string!
+override TimeSeries.SeasonalOrder.ToString() -> string!
+override TimeSeries.Transforms.DifferenceSpec.ToString() -> string!
+static readonly TimeSeries.SeasonalOrder.None -> TimeSeries.SeasonalOrder
+static readonly TimeSeries.Transforms.DifferenceSpec.None -> TimeSeries.Transforms.DifferenceSpec
+static TimeSeries.Accumulators.KpssResult.CriticalValue(double significance) -> double
+static TimeSeries.ArimaFit.ReadFrom(System.IO.Stream! source) -> TimeSeries.ArimaFit!
+static TimeSeries.Data.DbSourceOptions.Default.get -> TimeSeries.Data.DbSourceOptions!
+static TimeSeries.Data.SeriesBatchAssembler.KeyText(object? key) -> string!
+static TimeSeries.Data.SeriesBatchAssembler.ToTime(object! value) -> double
+static TimeSeries.ExogenousMatrix.FromColumn(double[]! column) -> TimeSeries.ExogenousMatrix!
+static TimeSeries.ExogenousMatrix.FromColumns(params double[]![]! columns) -> TimeSeries.ExogenousMatrix!
+static TimeSeries.ForecastHorizon.Days(int count) -> TimeSeries.ForecastHorizon
+static TimeSeries.ForecastHorizon.Months(int count) -> TimeSeries.ForecastHorizon
+static TimeSeries.ForecastHorizon.Periods(int count) -> TimeSeries.ForecastHorizon
+static TimeSeries.ForecastHorizon.Years(double count) -> TimeSeries.ForecastHorizon
+static TimeSeries.Forecasting.PsiWeights.Arma(System.ReadOnlySpan<double> phi, System.ReadOnlySpan<double> theta, int count) -> double[]!
+static TimeSeries.Forecasting.PsiWeights.Integrate(System.ReadOnlySpan<double> psi, TimeSeries.Transforms.DifferenceSpec spec) -> double[]!
+static TimeSeries.Forecasting.PsiWeights.StandardErrors(System.ReadOnlySpan<double> weights, double innovationVariance) -> double[]!
+static TimeSeries.ForecastOptions.Default.get -> TimeSeries.ForecastOptions!
+static TimeSeries.IncrementalArima.Restore(System.IO.Stream! state, TimeSeries.ArimaOptions! options) -> TimeSeries.IncrementalArima!
+static TimeSeries.Solvers.DurbinLevinson.Pacf(System.ReadOnlySpan<double> gamma, int maxLag) -> double[]!
+static TimeSeries.Solvers.DurbinLevinson.TryPacf(System.ReadOnlySpan<double> gamma, int maxLag, System.Span<double> pacf, out int computed) -> bool
+static TimeSeries.Solvers.DurbinLevinson.TryYuleWalker(System.ReadOnlySpan<double> gamma, int order, System.Span<double> coefficients, out double innovationVariance) -> bool
+static TimeSeries.Solvers.NormalEquationSolver.Default.get -> TimeSeries.Solvers.NormalEquationSolver!
+static TimeSeries.Solvers.PolynomialStability.IsInvertible(System.ReadOnlySpan<double> theta, out double margin) -> bool
+static TimeSeries.Solvers.PolynomialStability.IsMinimumPhase(System.ReadOnlySpan<double> coefficients, out double margin) -> bool
+static TimeSeries.Solvers.PolynomialStability.IsStationary(System.ReadOnlySpan<double> phi, out double margin) -> bool
+static TimeSeries.Statistics.Acf.Compute(System.ReadOnlySpan<double> series, int maxLag) -> TimeSeries.Accumulators.Autocovariances!
+static TimeSeries.Statistics.Acf.WhiteNoiseBound(double count, double confidence = 0.95) -> double
+static TimeSeries.Statistics.ErrorMetrics.Coverage(System.ReadOnlySpan<double> actual, System.ReadOnlySpan<double> lower, System.ReadOnlySpan<double> upper) -> double
+static TimeSeries.Statistics.ErrorMetrics.Mae(System.ReadOnlySpan<double> actual, System.ReadOnlySpan<double> forecast) -> double
+static TimeSeries.Statistics.ErrorMetrics.Mape(System.ReadOnlySpan<double> actual, System.ReadOnlySpan<double> forecast) -> double
+static TimeSeries.Statistics.ErrorMetrics.Mase(System.ReadOnlySpan<double> actual, System.ReadOnlySpan<double> forecast, System.ReadOnlySpan<double> training, int period = 1) -> double
+static TimeSeries.Statistics.ErrorMetrics.Mse(System.ReadOnlySpan<double> actual, System.ReadOnlySpan<double> forecast) -> double
+static TimeSeries.Statistics.ErrorMetrics.Rmse(System.ReadOnlySpan<double> actual, System.ReadOnlySpan<double> forecast) -> double
+static TimeSeries.Statistics.ErrorMetrics.Smape(System.ReadOnlySpan<double> actual, System.ReadOnlySpan<double> forecast) -> double
+static TimeSeries.Statistics.NormalDistribution.Cdf(double x) -> double
+static TimeSeries.Statistics.NormalDistribution.Quantile(double p) -> double
+static TimeSeries.Statistics.NormalDistribution.TwoSidedCriticalValue(double confidence) -> double
+static TimeSeries.Statistics.Pacf.Compute(System.ReadOnlySpan<double> series, int maxLag) -> double[]!
+static TimeSeries.Statistics.Pacf.FromAutocovariances(TimeSeries.Accumulators.Autocovariances! autocovariances, int maxLag) -> double[]!
+static TimeSeries.Transforms.DifferenceTransform.Continue(TimeSeries.Transforms.IntegrationState! state) -> TimeSeries.Transforms.DifferenceTransform!
+static TimeSeries.Transforms.Differencing.Difference(double[]! data, int lag = 1, bool isCumulative = false) -> double[]!
+static TimeSeries.Transforms.Differencing.Difference(System.ReadOnlySpan<double> series, TimeSeries.Transforms.DifferenceSpec spec) -> double[]!
+static TimeSeries.Transforms.Differencing.Difference(System.ReadOnlySpan<double> series, TimeSeries.Transforms.DifferenceSpec spec, out TimeSeries.Transforms.IntegrationState! state) -> double[]!
+static TimeSeries.Transforms.Differencing.Integrate(System.ReadOnlySpan<double> differenced, TimeSeries.Transforms.IntegrationState! state) -> double[]!
+static TimeSeries.Transforms.Differencing.InverseDifference(double[]! differencedData, double[]! originalData, int lag, int startIndex = 0, bool isCumulative = false, bool isLog = false, bool validateAgainstOriginal = false) -> double[]!
+static TimeSeries.Transforms.DifferencingExtensions.Difference(this double[]! series, int order) -> double[]!
+static TimeSeries.Transforms.DifferencingExtensions.Difference(this double[]! series, TimeSeries.Transforms.DifferenceSpec spec) -> double[]!
+static TimeSeries.Transforms.IntegrationState.FromEnd(System.ReadOnlySpan<double> series, TimeSeries.Transforms.DifferenceSpec spec) -> TimeSeries.Transforms.IntegrationState!
+static TimeSeries.Transforms.IntegrationState.FromStart(System.ReadOnlySpan<double> series, TimeSeries.Transforms.DifferenceSpec spec) -> TimeSeries.Transforms.IntegrationState!
+TimeSeries.Accumulators.AutocovarianceAccumulator
+TimeSeries.Accumulators.AutocovarianceAccumulator.Add(System.ReadOnlySpan<double> row) -> void
+TimeSeries.Accumulators.AutocovarianceAccumulator.AutocovarianceAccumulator(int maxLag, double offset = 0) -> void
+TimeSeries.Accumulators.AutocovarianceAccumulator.Count.get -> double
+TimeSeries.Accumulators.AutocovarianceAccumulator.Freeze() -> TimeSeries.Accumulators.Autocovariances!
+TimeSeries.Accumulators.AutocovarianceAccumulator.MaxLag.get -> int
+TimeSeries.Accumulators.AutocovarianceAccumulator.Merge(in TimeSeries.Accumulators.AutocovarianceAccumulator! other) -> void
+TimeSeries.Accumulators.AutocovarianceAccumulator.Offset.get -> double
+TimeSeries.Accumulators.AutocovarianceAccumulator.Reset() -> void
+TimeSeries.Accumulators.AutocovarianceAccumulator.Scale(double lambda) -> void
+TimeSeries.Accumulators.Autocovariances
+TimeSeries.Accumulators.Autocovariances.Acf.get -> System.ReadOnlyMemory<double>
+TimeSeries.Accumulators.Autocovariances.Count.get -> double
+TimeSeries.Accumulators.Autocovariances.Gamma.get -> System.ReadOnlyMemory<double>
+TimeSeries.Accumulators.Autocovariances.MaxLag.get -> int
+TimeSeries.Accumulators.Autocovariances.Mean.get -> double
+TimeSeries.Accumulators.Autocovariances.Variance.get -> double
+TimeSeries.Accumulators.GramMatrix
+TimeSeries.Accumulators.GramMatrix.Count.get -> double
+TimeSeries.Accumulators.GramMatrix.Dimension.get -> int
+TimeSeries.Accumulators.GramMatrix.LagDepth.get -> int
+TimeSeries.Accumulators.GramMatrix.Offset.get -> double
+TimeSeries.Accumulators.GramMatrix.Rows.get -> long
+TimeSeries.Accumulators.GramMatrix.Sums.get -> System.ReadOnlyMemory<double>
+TimeSeries.Accumulators.GramMatrix.this[int i, int j].get -> double
+TimeSeries.Accumulators.GramMatrix.Values.get -> System.ReadOnlyMemory<double>
+TimeSeries.Accumulators.IAccumulator<TSelf, TResult>
+TimeSeries.Accumulators.IAccumulator<TSelf, TResult>.Add(System.ReadOnlySpan<double> row) -> void
+TimeSeries.Accumulators.IAccumulator<TSelf, TResult>.Count.get -> double
+TimeSeries.Accumulators.IAccumulator<TSelf, TResult>.Freeze() -> TResult
+TimeSeries.Accumulators.IAccumulator<TSelf, TResult>.Merge(in TSelf other) -> void
+TimeSeries.Accumulators.IAccumulator<TSelf, TResult>.Scale(double lambda) -> void
+TimeSeries.Accumulators.KpssAccumulator
+TimeSeries.Accumulators.KpssAccumulator.Add(System.ReadOnlySpan<double> row) -> void
+TimeSeries.Accumulators.KpssAccumulator.Count.get -> double
+TimeSeries.Accumulators.KpssAccumulator.Freeze() -> TimeSeries.Accumulators.KpssResult!
+TimeSeries.Accumulators.KpssAccumulator.KpssAccumulator(int maxLag = 32) -> void
+TimeSeries.Accumulators.KpssAccumulator.MaxLag.get -> int
+TimeSeries.Accumulators.KpssAccumulator.Merge(in TimeSeries.Accumulators.KpssAccumulator! other) -> void
+TimeSeries.Accumulators.KpssAccumulator.Reset() -> void
+TimeSeries.Accumulators.KpssAccumulator.Scale(double lambda) -> void
+TimeSeries.Accumulators.KpssResult
+TimeSeries.Accumulators.KpssResult.Autocovariances.get -> TimeSeries.Accumulators.Autocovariances!
+TimeSeries.Accumulators.KpssResult.Bandwidth.get -> int
+TimeSeries.Accumulators.KpssResult.Count.get -> double
+TimeSeries.Accumulators.KpssResult.LongRunVariance.get -> double
+TimeSeries.Accumulators.KpssResult.RejectsStationarity(double significance = 0.05) -> bool
+TimeSeries.Accumulators.KpssResult.Statistic.get -> double
+TimeSeries.Accumulators.LagGramAccumulator
+TimeSeries.Accumulators.LagGramAccumulator.Add(System.ReadOnlySpan<double> row) -> void
+TimeSeries.Accumulators.LagGramAccumulator.Count.get -> double
+TimeSeries.Accumulators.LagGramAccumulator.Dimension.get -> int
+TimeSeries.Accumulators.LagGramAccumulator.Freeze() -> TimeSeries.Accumulators.GramMatrix!
+TimeSeries.Accumulators.LagGramAccumulator.IsCompensated.get -> bool
+TimeSeries.Accumulators.LagGramAccumulator.LagDepth.get -> int
+TimeSeries.Accumulators.LagGramAccumulator.LagGramAccumulator(int lagDepth, double offset = 0, bool compensated = false) -> void
+TimeSeries.Accumulators.LagGramAccumulator.Merge(in TimeSeries.Accumulators.LagGramAccumulator! other) -> void
+TimeSeries.Accumulators.LagGramAccumulator.Offset.get -> double
+TimeSeries.Accumulators.LagGramAccumulator.Reset() -> void
+TimeSeries.Accumulators.LagGramAccumulator.Rows.get -> long
+TimeSeries.Accumulators.LagGramAccumulator.Scale(double lambda) -> void
+TimeSeries.Accumulators.LagWindow
+TimeSeries.Accumulators.LagWindow.Available.get -> int
+TimeSeries.Accumulators.LagWindow.CopyRow(System.Span<double> destination) -> int
+TimeSeries.Accumulators.LagWindow.IsFull.get -> bool
+TimeSeries.Accumulators.LagWindow.LagDepth.get -> int
+TimeSeries.Accumulators.LagWindow.LagWindow(int lagDepth) -> void
+TimeSeries.Accumulators.LagWindow.Push(double value) -> void
+TimeSeries.Accumulators.LagWindow.Reset() -> void
+TimeSeries.Accumulators.LagWindow.RowLength.get -> int
+TimeSeries.Accumulators.Moments
+TimeSeries.Accumulators.Moments.Count.get -> double
+TimeSeries.Accumulators.Moments.Maximum.get -> double
+TimeSeries.Accumulators.Moments.Mean.get -> double
+TimeSeries.Accumulators.Moments.Minimum.get -> double
+TimeSeries.Accumulators.Moments.SampleVariance.get -> double
+TimeSeries.Accumulators.Moments.StandardDeviation.get -> double
+TimeSeries.Accumulators.Moments.Variance.get -> double
+TimeSeries.Accumulators.MomentsAccumulator
+TimeSeries.Accumulators.MomentsAccumulator.Add(double value) -> void
+TimeSeries.Accumulators.MomentsAccumulator.Add(System.ReadOnlySpan<double> row) -> void
+TimeSeries.Accumulators.MomentsAccumulator.AddRange(System.ReadOnlySpan<double> values) -> void
+TimeSeries.Accumulators.MomentsAccumulator.Count.get -> double
+TimeSeries.Accumulators.MomentsAccumulator.Freeze() -> TimeSeries.Accumulators.Moments!
+TimeSeries.Accumulators.MomentsAccumulator.Merge(in TimeSeries.Accumulators.MomentsAccumulator! other) -> void
+TimeSeries.Accumulators.MomentsAccumulator.MomentsAccumulator(double offset = 0) -> void
+TimeSeries.Accumulators.MomentsAccumulator.Offset.get -> double
+TimeSeries.Accumulators.MomentsAccumulator.Reset() -> void
+TimeSeries.Accumulators.MomentsAccumulator.Scale(double lambda) -> void
+TimeSeries.ArimaCandidate
+TimeSeries.ArimaCandidate.Aic.get -> double
+TimeSeries.ArimaCandidate.Aicc.get -> double
+TimeSeries.ArimaCandidate.Bic.get -> double
+TimeSeries.ArimaCandidate.Failure.get -> System.Exception?
+TimeSeries.ArimaCandidate.Fit.get -> TimeSeries.ArimaFit?
+TimeSeries.ArimaCandidate.Order.get -> TimeSeries.ArimaOrder
+TimeSeries.ArimaCandidate.Seasonal.get -> TimeSeries.SeasonalOrder
+TimeSeries.ArimaCandidate.Succeeded.get -> bool
+TimeSeries.ArimaDiagnostics
+TimeSeries.ArimaDiagnostics.Aic.get -> double
+TimeSeries.ArimaDiagnostics.Aicc.get -> double
+TimeSeries.ArimaDiagnostics.Bic.get -> double
+TimeSeries.ArimaDiagnostics.EffectiveObservations.get -> double
+TimeSeries.ArimaDiagnostics.InvertibilityMargin.get -> double
+TimeSeries.ArimaDiagnostics.IsConstantSeries.get -> bool
+TimeSeries.ArimaDiagnostics.IsInvertible.get -> bool
+TimeSeries.ArimaDiagnostics.IsStationary.get -> bool
+TimeSeries.ArimaDiagnostics.LogLikelihood.get -> double
+TimeSeries.ArimaDiagnostics.ParameterCount.get -> int
+TimeSeries.ArimaDiagnostics.PilotOrder.get -> int
+TimeSeries.ArimaDiagnostics.ResidualSumOfSquares.get -> double
+TimeSeries.ArimaDiagnostics.Solve.get -> TimeSeries.Solvers.SolveDiagnostics
+TimeSeries.ArimaDiagnostics.StationarityMargin.get -> double
+TimeSeries.ArimaFit
+TimeSeries.ArimaFit.AutoRegressive.get -> System.ReadOnlyMemory<double>
+TimeSeries.ArimaFit.Diagnostics.get -> TimeSeries.ArimaDiagnostics!
+TimeSeries.ArimaFit.ExogenousCoefficients.get -> System.ReadOnlyMemory<double>
+TimeSeries.ArimaFit.Forecast(TimeSeries.ForecastHorizon horizon, TimeSeries.ExogenousMatrix! future, TimeSeries.ForecastOptions? options = null) -> TimeSeries.ForecastResult!
+TimeSeries.ArimaFit.Forecast(TimeSeries.ForecastHorizon horizon, TimeSeries.ForecastOptions? options = null) -> TimeSeries.ForecastResult!
+TimeSeries.ArimaFit.InnovationVariance.get -> double
+TimeSeries.ArimaFit.Intercept.get -> double
+TimeSeries.ArimaFit.MovingAverage.get -> System.ReadOnlyMemory<double>
+TimeSeries.ArimaFit.ObservationCount.get -> long
+TimeSeries.ArimaFit.Options.get -> TimeSeries.ArimaOptions!
+TimeSeries.ArimaFit.Order.get -> TimeSeries.ArimaOrder
+TimeSeries.ArimaFit.RegressorCount.get -> int
+TimeSeries.ArimaFit.Seasonal.get -> TimeSeries.SeasonalOrder
+TimeSeries.ArimaFit.StandardErrors.get -> System.ReadOnlyMemory<double>
+TimeSeries.ArimaFit.Window.get -> TimeSeries.FitWindow
+TimeSeries.ArimaFit.WriteTo(System.IO.Stream! destination) -> void
+TimeSeries.ArimaModel
+TimeSeries.ArimaModel.ArimaModel(TimeSeries.ArimaOptions! options) -> void
+TimeSeries.ArimaModel.Fit(System.ReadOnlySpan<double> series) -> TimeSeries.ArimaFit!
+TimeSeries.ArimaModel.Fit(System.ReadOnlySpan<double> series, TimeSeries.ExogenousMatrix! exogenous) -> TimeSeries.ArimaFit!
+TimeSeries.ArimaModel.FitAsync(System.Collections.Generic.IAsyncEnumerable<double>! series, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<TimeSeries.ArimaFit!>
+TimeSeries.ArimaModel.FitAsync(TimeSeries.Data.ITimeSeriesSource! source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<TimeSeries.ArimaFit!>
+TimeSeries.ArimaModel.FitManyAsync(TimeSeries.Data.IGroupedTimeSeriesSource! source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<TimeSeries.Data.KeyedArimaFit!>!
+TimeSeries.ArimaModel.Options.get -> TimeSeries.ArimaOptions!
+TimeSeries.ArimaOptions
+TimeSeries.ArimaOptions.ForgettingFactor.get -> double
+TimeSeries.ArimaOptions.ForgettingFactor.init -> void
+TimeSeries.ArimaOptions.Frequency.get -> TimeSeries.SeriesFrequency?
+TimeSeries.ArimaOptions.Frequency.init -> void
+TimeSeries.ArimaOptions.IncludeIntercept.get -> bool
+TimeSeries.ArimaOptions.IncludeIntercept.init -> void
+TimeSeries.ArimaOptions.MaxPilotOrder.get -> int
+TimeSeries.ArimaOptions.MaxPilotOrder.init -> void
+TimeSeries.ArimaOptions.Order.get -> TimeSeries.ArimaOrder
+TimeSeries.ArimaOptions.Order.init -> void
+TimeSeries.ArimaOptions.PilotOrder.get -> int?
+TimeSeries.ArimaOptions.PilotOrder.init -> void
+TimeSeries.ArimaOptions.Ridge.get -> double
+TimeSeries.ArimaOptions.Ridge.init -> void
+TimeSeries.ArimaOptions.Seasonal.get -> TimeSeries.SeasonalOrder
+TimeSeries.ArimaOptions.Seasonal.init -> void
+TimeSeries.ArimaOptions.Validate() -> void
+TimeSeries.ArimaOrder
+TimeSeries.ArimaOrder.ArimaOrder() -> void
+TimeSeries.ArimaOrder.ArimaOrder(int P, int D, int Q) -> void
+TimeSeries.ArimaOrder.D.get -> int
+TimeSeries.ArimaOrder.D.init -> void
+TimeSeries.ArimaOrder.P.get -> int
+TimeSeries.ArimaOrder.P.init -> void
+TimeSeries.ArimaOrder.Q.get -> int
+TimeSeries.ArimaOrder.Q.init -> void
+TimeSeries.ArimaSelection
+TimeSeries.ArimaSelection.Best.get -> TimeSeries.ArimaFit!
+TimeSeries.ArimaSelection.Candidates.get -> System.Collections.Generic.IReadOnlyList<TimeSeries.ArimaCandidate!>!
+TimeSeries.ArimaSelection.ChosenDifferencing.get -> TimeSeries.DifferencingCandidate!
+TimeSeries.ArimaSelection.Criterion.get -> TimeSeries.InformationCriterion
+TimeSeries.ArimaSelection.Differencing.get -> System.Collections.Generic.IReadOnlyList<TimeSeries.DifferencingCandidate!>!
+TimeSeries.AutoArima
+TimeSeries.AutoArima.AutoArima(TimeSeries.AutoArimaOptions! options) -> void
+TimeSeries.AutoArima.Options.get -> TimeSeries.AutoArimaOptions!
+TimeSeries.AutoArima.Select(System.ReadOnlySpan<double> series) -> TimeSeries.ArimaSelection!
+TimeSeries.AutoArima.Select(System.ReadOnlySpan<double> series, TimeSeries.ExogenousMatrix! exogenous) -> TimeSeries.ArimaSelection!
+TimeSeries.AutoArima.SelectAsync(TimeSeries.Data.ITimeSeriesSource! source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<TimeSeries.ArimaSelection!>
+TimeSeries.AutoArimaOptions
+TimeSeries.AutoArimaOptions.Criterion.get -> TimeSeries.InformationCriterion
+TimeSeries.AutoArimaOptions.Criterion.init -> void
+TimeSeries.AutoArimaOptions.DifferenceOrders.get -> System.Collections.Generic.IReadOnlyList<int>!
+TimeSeries.AutoArimaOptions.DifferenceOrders.init -> void
+TimeSeries.AutoArimaOptions.Frequency.get -> TimeSeries.SeriesFrequency?
+TimeSeries.AutoArimaOptions.Frequency.init -> void
+TimeSeries.AutoArimaOptions.IncludeIntercept.get -> bool
+TimeSeries.AutoArimaOptions.IncludeIntercept.init -> void
+TimeSeries.AutoArimaOptions.MaxP.get -> int
+TimeSeries.AutoArimaOptions.MaxP.init -> void
+TimeSeries.AutoArimaOptions.MaxPilotOrder.get -> int
+TimeSeries.AutoArimaOptions.MaxPilotOrder.init -> void
+TimeSeries.AutoArimaOptions.MaxQ.get -> int
+TimeSeries.AutoArimaOptions.MaxQ.init -> void
+TimeSeries.AutoArimaOptions.Ridge.get -> double
+TimeSeries.AutoArimaOptions.Ridge.init -> void
+TimeSeries.AutoArimaOptions.SeasonalCandidates.get -> System.Collections.Generic.IReadOnlyList<TimeSeries.SeasonalOrder>!
+TimeSeries.AutoArimaOptions.SeasonalCandidates.init -> void
+TimeSeries.AutoArimaOptions.SeasonalStrengthThreshold.get -> double
+TimeSeries.AutoArimaOptions.SeasonalStrengthThreshold.init -> void
+TimeSeries.AutoArimaOptions.StationaritySignificance.get -> double
+TimeSeries.AutoArimaOptions.StationaritySignificance.init -> void
+TimeSeries.AutoArimaOptions.Validate() -> void
+TimeSeries.Data.ArraySource
+TimeSeries.Data.ArraySource.ArraySource(System.ReadOnlyMemory<double> values, TimeSeries.ExogenousMatrix? exogenous = null, int batchSize = 8192) -> void
+TimeSeries.Data.ArraySource.Count.get -> int
+TimeSeries.Data.ArraySource.OpenAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<TimeSeries.Data.ITimeSeriesCursor!>
+TimeSeries.Data.ArraySource.RegressorCount.get -> int
+TimeSeries.Data.DbSourceOptions
+TimeSeries.Data.DbSourceOptions.ExpectedNumericStep.get -> double?
+TimeSeries.Data.DbSourceOptions.ExpectedNumericStep.init -> void
+TimeSeries.Data.DbSourceOptions.ExpectedStep.get -> System.TimeSpan?
+TimeSeries.Data.DbSourceOptions.ExpectedStep.init -> void
+TimeSeries.Data.DbSourceOptions.Gaps.get -> TimeSeries.Data.GapPolicy
+TimeSeries.Data.DbSourceOptions.Gaps.init -> void
+TimeSeries.Data.DbSourceOptions.KeyComparer.get -> System.Collections.Generic.IComparer<object!>?
+TimeSeries.Data.DbSourceOptions.KeyComparer.init -> void
+TimeSeries.Data.DbSourceOptions.MaxGap.get -> System.TimeSpan?
+TimeSeries.Data.DbSourceOptions.MaxGap.init -> void
+TimeSeries.Data.DbSourceOptions.MaxNumericGap.get -> double?
+TimeSeries.Data.DbSourceOptions.MaxNumericGap.init -> void
+TimeSeries.Data.DbSourceOptions.ValidateKeyOrder.get -> bool
+TimeSeries.Data.DbSourceOptions.ValidateKeyOrder.init -> void
+TimeSeries.Data.GapPolicy
+TimeSeries.Data.GapPolicy.ForwardFill = 1 -> TimeSeries.Data.GapPolicy
+TimeSeries.Data.GapPolicy.Interpolate = 2 -> TimeSeries.Data.GapPolicy
+TimeSeries.Data.GapPolicy.Throw = 0 -> TimeSeries.Data.GapPolicy
+TimeSeries.Data.IGroupedTimeSeriesCursor
+TimeSeries.Data.IGroupedTimeSeriesCursor.Current.get -> TimeSeries.Data.KeyedSeriesBatch
+TimeSeries.Data.IGroupedTimeSeriesCursor.ReadAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
+TimeSeries.Data.IGroupedTimeSeriesSource
+TimeSeries.Data.IGroupedTimeSeriesSource.OpenAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<TimeSeries.Data.IGroupedTimeSeriesCursor!>
+TimeSeries.Data.IGroupedTimeSeriesSource.RegressorCount.get -> int
+TimeSeries.Data.ITimeSeriesCursor
+TimeSeries.Data.ITimeSeriesCursor.Current.get -> TimeSeries.Data.SeriesBatch
+TimeSeries.Data.ITimeSeriesCursor.ReadAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
+TimeSeries.Data.ITimeSeriesSource
+TimeSeries.Data.ITimeSeriesSource.OpenAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<TimeSeries.Data.ITimeSeriesCursor!>
+TimeSeries.Data.ITimeSeriesSource.RegressorCount.get -> int
+TimeSeries.Data.KeyedArimaFit
+TimeSeries.Data.KeyedArimaFit.Error.get -> System.Exception?
+TimeSeries.Data.KeyedArimaFit.Fit.get -> TimeSeries.ArimaFit?
+TimeSeries.Data.KeyedArimaFit.Key.get -> string!
+TimeSeries.Data.KeyedArimaFit.ObservationCount.get -> long
+TimeSeries.Data.KeyedArimaFit.Succeeded.get -> bool
+TimeSeries.Data.KeyedSeriesBatch
+TimeSeries.Data.KeyedSeriesBatch.Batch.get -> TimeSeries.Data.SeriesBatch
+TimeSeries.Data.KeyedSeriesBatch.Key.get -> string!
+TimeSeries.Data.KeyedSeriesBatch.KeyedSeriesBatch() -> void
+TimeSeries.Data.KeyedSeriesBatch.KeyedSeriesBatch(string! key, TimeSeries.Data.SeriesBatch batch) -> void
+TimeSeries.Data.SeriesBatch
+TimeSeries.Data.SeriesBatch.Count.get -> int
+TimeSeries.Data.SeriesBatch.Exogenous.get -> System.ReadOnlyMemory<double>
+TimeSeries.Data.SeriesBatch.RegressorCount.get -> int
+TimeSeries.Data.SeriesBatch.SeriesBatch() -> void
+TimeSeries.Data.SeriesBatch.SeriesBatch(System.ReadOnlyMemory<double> values, System.ReadOnlyMemory<double> exogenous, int regressorCount) -> void
+TimeSeries.Data.SeriesBatch.Values.get -> System.ReadOnlyMemory<double>
+TimeSeries.Data.SeriesBatchAssembler
+TimeSeries.Data.SeriesBatchAssembler.Batch.get -> TimeSeries.Data.SeriesBatch
+TimeSeries.Data.SeriesBatchAssembler.BatchKey.get -> string!
+TimeSeries.Data.SeriesBatchAssembler.BeginBatch() -> void
+TimeSeries.Data.SeriesBatchAssembler.Count.get -> int
+TimeSeries.Data.SeriesBatchAssembler.Dispose() -> void
+TimeSeries.Data.SeriesBatchAssembler.HasDeferredWork.get -> bool
+TimeSeries.Data.SeriesBatchAssembler.IsFull.get -> bool
+TimeSeries.Data.SeriesBatchAssembler.Push(double value, System.ReadOnlySpan<double> exogenous, double time, object? timeRaw, object? key) -> bool
+TimeSeries.Data.SeriesBatchAssembler.SeriesBatchAssembler(int regressorCount, int batchSize, TimeSeries.Data.DbSourceOptions! options, bool grouped, bool trackTime, bool timeIsTicks) -> void
+TimeSeries.DifferencingCandidate
+TimeSeries.DifferencingCandidate.IsConstant.get -> bool
+TimeSeries.DifferencingCandidate.Kpss.get -> TimeSeries.Accumulators.KpssResult!
+TimeSeries.DifferencingCandidate.Order.get -> int
+TimeSeries.DifferencingCandidate.Seasonal.get -> TimeSeries.SeasonalOrder
+TimeSeries.DifferencingCandidate.SeasonalAutocorrelation.get -> double
+TimeSeries.ExogenousMatrix
+TimeSeries.ExogenousMatrix.Count.get -> int
+TimeSeries.ExogenousMatrix.ExogenousMatrix(System.ReadOnlyMemory<double> rowMajor, int regressorCount) -> void
+TimeSeries.ExogenousMatrix.RegressorCount.get -> int
+TimeSeries.ExogenousMatrix.Row(int row) -> System.ReadOnlySpan<double>
+TimeSeries.ExogenousMatrix.Rows(int start, int count) -> System.ReadOnlySpan<double>
+TimeSeries.ExogenousMatrix.this[int row, int regressor].get -> double
+TimeSeries.ExogenousMatrix.Values.get -> System.ReadOnlyMemory<double>
+TimeSeries.FitWindow
+TimeSeries.FitWindow.Count.get -> long
+TimeSeries.FitWindow.FitWindow() -> void
+TimeSeries.FitWindow.FitWindow(long From, long To) -> void
+TimeSeries.FitWindow.From.get -> long
+TimeSeries.FitWindow.From.init -> void
+TimeSeries.FitWindow.To.get -> long
+TimeSeries.FitWindow.To.init -> void
+TimeSeries.ForecastAggregate
+TimeSeries.ForecastAggregate.Count.get -> int
+TimeSeries.ForecastAggregate.ForecastAggregate() -> void
+TimeSeries.ForecastAggregate.Lower.get -> double
+TimeSeries.ForecastAggregate.Mean.get -> double
+TimeSeries.ForecastAggregate.StandardError.get -> double
+TimeSeries.ForecastAggregate.Start.get -> int
+TimeSeries.ForecastAggregate.Upper.get -> double
+TimeSeries.ForecastHorizon
+TimeSeries.ForecastHorizon.Amount.get -> double
+TimeSeries.ForecastHorizon.ForecastHorizon() -> void
+TimeSeries.ForecastHorizon.Resolve(TimeSeries.SeriesFrequency? frequency) -> int
+TimeSeries.ForecastHorizon.Unit.get -> TimeSeries.HorizonUnit
+TimeSeries.ForecastHorizonException
+TimeSeries.ForecastHorizonException.ForecastHorizonException(string! message) -> void
+TimeSeries.Forecasting.PsiWeights
+TimeSeries.ForecastOptions
+TimeSeries.ForecastOptions.Confidence.get -> double
+TimeSeries.ForecastOptions.Confidence.init -> void
+TimeSeries.ForecastOptions.RequireInvertible.get -> bool
+TimeSeries.ForecastOptions.RequireInvertible.init -> void
+TimeSeries.ForecastOptions.Validate() -> void
+TimeSeries.ForecastResult
+TimeSeries.ForecastResult.Confidence.get -> double
+TimeSeries.ForecastResult.CriticalValue.get -> double
+TimeSeries.ForecastResult.InnovationVariance.get -> double
+TimeSeries.ForecastResult.Lower.get -> System.ReadOnlyMemory<double>
+TimeSeries.ForecastResult.Mean.get -> System.ReadOnlyMemory<double>
+TimeSeries.ForecastResult.Origin.get -> long
+TimeSeries.ForecastResult.PsiWeights.get -> System.ReadOnlyMemory<double>
+TimeSeries.ForecastResult.StandardError.get -> System.ReadOnlyMemory<double>
+TimeSeries.ForecastResult.Steps.get -> int
+TimeSeries.ForecastResult.Sum(int start, int count) -> TimeSeries.ForecastAggregate
+TimeSeries.ForecastResult.Upper.get -> System.ReadOnlyMemory<double>
+TimeSeries.ForecastResult.Warnings.get -> System.Collections.Generic.IReadOnlyList<string!>!
+TimeSeries.HorizonUnit
+TimeSeries.HorizonUnit.Days = 1 -> TimeSeries.HorizonUnit
+TimeSeries.HorizonUnit.Months = 2 -> TimeSeries.HorizonUnit
+TimeSeries.HorizonUnit.Periods = 0 -> TimeSeries.HorizonUnit
+TimeSeries.HorizonUnit.Years = 3 -> TimeSeries.HorizonUnit
+TimeSeries.IncrementalArima
+TimeSeries.IncrementalArima.Fold(System.ReadOnlySpan<double> values) -> void
+TimeSeries.IncrementalArima.Fold(System.ReadOnlySpan<double> values, TimeSeries.ExogenousMatrix! exogenous) -> void
+TimeSeries.IncrementalArima.FoldAsync(TimeSeries.Data.ITimeSeriesSource! newRows, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
+TimeSeries.IncrementalArima.FoldCount.get -> int
+TimeSeries.IncrementalArima.IncrementalArima(TimeSeries.ArimaOptions! options, int regressorCount = 0) -> void
+TimeSeries.IncrementalArima.Options.get -> TimeSeries.ArimaOptions!
+TimeSeries.IncrementalArima.RegressorCount.get -> int
+TimeSeries.IncrementalArima.SaveTo(System.IO.Stream! destination) -> void
+TimeSeries.IncrementalArima.Solve() -> TimeSeries.ArimaFit!
+TimeSeries.IncrementalArima.Watermark.get -> TimeSeries.FitWindow
+TimeSeries.InformationCriterion
+TimeSeries.InformationCriterion.Aic = 0 -> TimeSeries.InformationCriterion
+TimeSeries.InformationCriterion.Aicc = 1 -> TimeSeries.InformationCriterion
+TimeSeries.InformationCriterion.Bic = 2 -> TimeSeries.InformationCriterion
+TimeSeries.InsufficientDataException
+TimeSeries.InsufficientDataException.Available.get -> long
+TimeSeries.InsufficientDataException.InsufficientDataException(long required, long available, string! message) -> void
+TimeSeries.InsufficientDataException.Required.get -> long
+TimeSeries.InvalidSeriesException
+TimeSeries.InvalidSeriesException.Index.get -> long
+TimeSeries.InvalidSeriesException.InvalidSeriesException(string! paramName, long index, double value) -> void
+TimeSeries.InvalidSeriesException.Value.get -> double
+TimeSeries.SeasonalOrder
+TimeSeries.SeasonalOrder.D.get -> int
+TimeSeries.SeasonalOrder.D.init -> void
+TimeSeries.SeasonalOrder.Period.get -> int
+TimeSeries.SeasonalOrder.Period.init -> void
+TimeSeries.SeasonalOrder.SeasonalOrder() -> void
+TimeSeries.SeasonalOrder.SeasonalOrder(int D, int Period) -> void
+TimeSeries.SeriesFrequency
+TimeSeries.SeriesFrequency.BusinessDaily = 252 -> TimeSeries.SeriesFrequency
+TimeSeries.SeriesFrequency.Daily = 365 -> TimeSeries.SeriesFrequency
+TimeSeries.SeriesFrequency.Hourly = 8760 -> TimeSeries.SeriesFrequency
+TimeSeries.SeriesFrequency.Monthly = 12 -> TimeSeries.SeriesFrequency
+TimeSeries.SeriesFrequency.Quarterly = 4 -> TimeSeries.SeriesFrequency
+TimeSeries.SeriesFrequency.Weekly = 52 -> TimeSeries.SeriesFrequency
+TimeSeries.SeriesFrequency.Yearly = 1 -> TimeSeries.SeriesFrequency
+TimeSeries.SeriesGapException
+TimeSeries.SeriesGapException.After.get -> string!
+TimeSeries.SeriesGapException.Before.get -> string!
+TimeSeries.SeriesGapException.Key.get -> string?
+TimeSeries.SeriesGapException.SeriesGapException(string! before, string! after, string? key, string! message) -> void
+TimeSeries.SeriesOrderException
+TimeSeries.SeriesOrderException.Current.get -> string!
+TimeSeries.SeriesOrderException.Previous.get -> string!
+TimeSeries.SeriesOrderException.SeriesOrderException(string! previous, string! current, string! message) -> void
+TimeSeries.SingularDesignException
+TimeSeries.SingularDesignException.Column.get -> int
+TimeSeries.SingularDesignException.SingularDesignException(string! stage, int column, string! message) -> void
+TimeSeries.SingularDesignException.Stage.get -> string!
+TimeSeries.Solvers.DurbinLevinson
+TimeSeries.Solvers.ILinearSolver
+TimeSeries.Solvers.ILinearSolver.TrySolve(System.ReadOnlySpan<double> gram, System.ReadOnlySpan<double> rhs, System.Span<double> coefficients, out TimeSeries.Solvers.SolveDiagnostics diagnostics) -> bool
+TimeSeries.Solvers.NormalEquationSolver
+TimeSeries.Solvers.NormalEquationSolver.NormalEquationSolver(double ridge = 0, bool scaleColumns = true, double pivotTolerance = 1E-12) -> void
+TimeSeries.Solvers.NormalEquationSolver.PivotTolerance.get -> double
+TimeSeries.Solvers.NormalEquationSolver.Ridge.get -> double
+TimeSeries.Solvers.NormalEquationSolver.ScaleColumns.get -> bool
+TimeSeries.Solvers.NormalEquationSolver.TrySolve(System.ReadOnlySpan<double> gram, System.ReadOnlySpan<double> rhs, System.Span<double> coefficients, out TimeSeries.Solvers.SolveDiagnostics diagnostics) -> bool
+TimeSeries.Solvers.PolynomialStability
+TimeSeries.Solvers.SolveDiagnostics
+TimeSeries.Solvers.SolveDiagnostics.ColumnsScaled.get -> bool
+TimeSeries.Solvers.SolveDiagnostics.ColumnsScaled.init -> void
+TimeSeries.Solvers.SolveDiagnostics.Dimension.get -> int
+TimeSeries.Solvers.SolveDiagnostics.Dimension.init -> void
+TimeSeries.Solvers.SolveDiagnostics.FailedColumn.get -> int
+TimeSeries.Solvers.SolveDiagnostics.FailedColumn.init -> void
+TimeSeries.Solvers.SolveDiagnostics.LargestPivot.get -> double
+TimeSeries.Solvers.SolveDiagnostics.LargestPivot.init -> void
+TimeSeries.Solvers.SolveDiagnostics.PivotRatio.get -> double
+TimeSeries.Solvers.SolveDiagnostics.Ridge.get -> double
+TimeSeries.Solvers.SolveDiagnostics.Ridge.init -> void
+TimeSeries.Solvers.SolveDiagnostics.SmallestPivot.get -> double
+TimeSeries.Solvers.SolveDiagnostics.SmallestPivot.init -> void
+TimeSeries.Solvers.SolveDiagnostics.SolveDiagnostics() -> void
+TimeSeries.Solvers.SolveDiagnostics.Succeeded.get -> bool
+TimeSeries.Solvers.SolveDiagnostics.Succeeded.init -> void
+TimeSeries.Statistics.Acf
+TimeSeries.Statistics.ErrorMetrics
+TimeSeries.Statistics.NormalDistribution
+TimeSeries.Statistics.Pacf
+TimeSeries.Transforms.DifferenceSpec
+TimeSeries.Transforms.DifferenceSpec.DifferenceSpec() -> void
+TimeSeries.Transforms.DifferenceSpec.DifferenceSpec(int order, int seasonalOrder = 0, int period = 0) -> void
+TimeSeries.Transforms.DifferenceSpec.IsIdentity.get -> bool
+TimeSeries.Transforms.DifferenceSpec.Order.get -> int
+TimeSeries.Transforms.DifferenceSpec.Period.get -> int
+TimeSeries.Transforms.DifferenceSpec.SeasonalOrder.get -> int
+TimeSeries.Transforms.DifferenceSpec.WarmupLength.get -> int
+TimeSeries.Transforms.DifferenceTransform
+TimeSeries.Transforms.DifferenceTransform.CaptureState() -> TimeSeries.Transforms.IntegrationState!
+TimeSeries.Transforms.DifferenceTransform.DifferenceTransform(TimeSeries.Transforms.DifferenceSpec spec) -> void
+TimeSeries.Transforms.DifferenceTransform.IsWarm.get -> bool
+TimeSeries.Transforms.DifferenceTransform.Reset() -> void
+TimeSeries.Transforms.DifferenceTransform.Spec.get -> TimeSeries.Transforms.DifferenceSpec
+TimeSeries.Transforms.DifferenceTransform.Transform(System.ReadOnlySpan<double> input, System.Span<double> output) -> int
+TimeSeries.Transforms.DifferenceTransform.WarmupLength.get -> int
+TimeSeries.Transforms.Differencing
+TimeSeries.Transforms.DifferencingExtensions
+TimeSeries.Transforms.IntegrationState
+TimeSeries.Transforms.IntegrationState.Integrate(System.ReadOnlySpan<double> differenced) -> double[]!
+TimeSeries.Transforms.IntegrationState.Integrate(System.ReadOnlySpan<double> differenced, System.Span<double> output) -> int
+TimeSeries.Transforms.IntegrationState.IntegrationState(TimeSeries.Transforms.DifferenceSpec spec, System.ReadOnlySpan<double> tail) -> void
+TimeSeries.Transforms.IntegrationState.Spec.get -> TimeSeries.Transforms.DifferenceSpec
+TimeSeries.Transforms.IntegrationState.Tail.get -> System.ReadOnlyMemory<double>
+TimeSeries.Transforms.ISeriesTransform
+TimeSeries.Transforms.ISeriesTransform.Reset() -> void
+TimeSeries.Transforms.ISeriesTransform.Transform(System.ReadOnlySpan<double> input, System.Span<double> output) -> int
+TimeSeries.Transforms.ISeriesTransform.WarmupLength.get -> int
