@@ -517,3 +517,11 @@ TimeSeries.Statistics.ChiSquaredDistribution
 TimeSeries.ArimaCandidate.IsAdmissible.get -> bool
 TimeSeries.AutoArimaOptions.RequireAdmissible.get -> bool
 TimeSeries.AutoArimaOptions.RequireAdmissible.init -> void
+static TimeSeries.ExogenousMatrix.FromSourceAsync(TimeSeries.Data.ITimeSeriesSource! source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<TimeSeries.ExogenousMatrix!>
+TimeSeries.ArimaOptions.RegressorDifferencing.get -> TimeSeries.RegressorDifferencing
+TimeSeries.ArimaOptions.RegressorDifferencing.init -> void
+TimeSeries.AutoArimaOptions.RegressorDifferencing.get -> TimeSeries.RegressorDifferencing
+TimeSeries.AutoArimaOptions.RegressorDifferencing.init -> void
+TimeSeries.RegressorDifferencing
+TimeSeries.RegressorDifferencing.None = 1 -> TimeSeries.RegressorDifferencing
+TimeSeries.RegressorDifferencing.SameAsSeries = 0 -> TimeSeries.RegressorDifferencing

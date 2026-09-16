@@ -73,6 +73,9 @@ public sealed record AutoArimaOptions
     /// <summary>Residual autocorrelations examined by the Ljung-Box test on every candidate. Default 10; zero disables.</summary>
     public int LjungBoxLags { get; init; } = 10;
 
+    /// <summary>How regressors enter differenced candidates. Default <see cref="TimeSeries.RegressorDifferencing.SameAsSeries"/>.</summary>
+    public RegressorDifferencing RegressorDifferencing { get; init; } = RegressorDifferencing.SameAsSeries;
+
     /// <summary>
     /// Whether a candidate must be stationary and invertible to win. Default true, as in
     /// auto.arima. Hannan-Rissanen on a short series can land an over-parameterised
@@ -121,6 +124,7 @@ public sealed record AutoArimaOptions
         Ridge = Ridge,
         Frequency = Frequency,
         LjungBoxLags = LjungBoxLags,
+        RegressorDifferencing = RegressorDifferencing,
     };
 
     /// <summary>One candidate model.</summary>
@@ -133,5 +137,6 @@ public sealed record AutoArimaOptions
         Ridge = Ridge,
         Frequency = Frequency,
         LjungBoxLags = LjungBoxLags,
+        RegressorDifferencing = RegressorDifferencing,
     };
 }

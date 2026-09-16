@@ -130,7 +130,7 @@ public sealed class MongoSeriesCursor : ITimeSeriesCursor, IGroupedTimeSeriesCur
     private (double Value, double Time, object? TimeRaw, object? Key) ReadDocument(BsonDocument document)
     {
         var query = _source.Query;
-        var value = ReadNumber(document, query.ValueField);
+        var value = query.ValueField is null ? 0d : ReadNumber(document, query.ValueField);
 
         for (var i = 0; i < _rowExogenous.Length; i++)
         {

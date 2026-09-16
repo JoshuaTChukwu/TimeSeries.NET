@@ -173,6 +173,39 @@ solve possible; it differs from "regression with ARIMA errors" (R's `Arima(xreg=
 where the AR polynomial also acts on `β′x_t`. In this form `β` is the contemporaneous
 effect and the long-run effect is `β / (1 − Σφ)`.
 
+### Reading from views — the access model
+
+The library reads; it never writes, never generates SQL, and never needs a table. The
+database owner creates a view over whatever schema they have and grants `SELECT` on it:
+
+```sql
+CREATE VIEW vw_debt_history   AS SELECT period, debt_gdp, unemployment, inflation, growth, rate FROM fiscal_quarterly;
+CREATE VIEW vw_macro_scenario AS SELECT scenario, period, unemployment, inflation, growth, rate FROM macro_projection;
+GRANT SELECT ON vw_debt_history, vw_macro_scenario TO forecasting_role;
+```
+
+The forecasting process connects as `forecasting_role`. Its `DbSeriesQuery` names the
+view and the roles of its columns; the connection is opened for one traversal, read
+with sequential access, and disposed before any arithmetic starts.
+
+An ARIMAX forecast needs the regressors' **future** values, and the library will not
+extrapolate them. They come from a second view — a scenario table of assumed paths —
+read through the same adapter with `ValueColumn = null` and
+`ExogenousMatrix.FromSourceAsync(source)`. Several scenarios (baseline, adverse) are
+several forecasts from one fit. `samples/TimeSeries.NET.PublicDebt` is this workflow
+end to end: debt/GDP fitted from one view, ten years forecast under two scenarios from
+another.
+
+### Regressors on a differenced series
+
+With `d = 1` the regressors are, by default, differenced with the series
+(`RegressorDifferencing.SameAsSeries` — the regression-with-ARIMA-errors convention:
+changes explained by changes). When the *level* of a driver acts on the *change* in
+the series — public debt grows by the level of the deficit, rates and growth; default
+rates move with the level of unemployment — set `RegressorDifferencing.None`, and the
+model becomes Δy_t = c + φ Δy_{t−1} + β′x_t + ε_t with x undifferenced. Future
+regressors are then supplied as levels too.
+
 ### Gaps and ordering
 
 ARIMA assumes regular spacing. `DbTimeSeriesSource` checks it when a `TimeColumn` and an
@@ -198,6 +231,8 @@ its own acceptance criteria.
 - [x] **M6** — Streaming: batched cursor, `DbTimeSeriesSource`, multi-series scan,
       incremental fold
 - [x] **M7** — `AutoArima` grid search, MongoDB source, DI extensions, NuGet packaging
+- [x] Ljung–Box in one pass; parallel per-key workers; admissibility guard in `AutoArima`; `RegressorDifferencing`
+- [x] Samples: `samples/TimeSeries.NET.Demo` (default rate, population scan) and `samples/TimeSeries.NET.PublicDebt` (two views, two scenarios)
 - [ ] Publish `0.1.0-preview.1` to NuGet.org
 - [ ] Additional models: ETS, Holt–Winters
 

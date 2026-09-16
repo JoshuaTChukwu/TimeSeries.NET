@@ -74,7 +74,7 @@ internal sealed class ArimaScan
 
         for (var i = 0; i < regressorCount; i++)
         {
-            _xTransforms[i] = new DifferenceTransform(spec);
+            _xTransforms[i] = new DifferenceTransform(options.RegressorSpec);
             _xWindows[i] = new LagWindow(_layout.ExogenousLags);
         }
 
@@ -130,6 +130,11 @@ internal sealed class ArimaScan
 
         var produced = _yTransform.Transform(values, _zScratch);
 
+        // A differenced output belongs to the raw row that completed it, which is the last
+        // `produced` rows of this batch. Regressors differenced with the series line up on
+        // their own; regressors entering as levels are read at that raw row.
+        var skip = count - produced;
+
         for (var i = 0; i < _r; i++)
         {
             for (var t = 0; t < count; t++)
@@ -138,11 +143,17 @@ internal sealed class ArimaScan
             }
 
             var producedX = _xTransforms[i].Transform(_columnScratch.AsSpan(0, count), _xScratch[i]);
+            var expected = _xTransforms[i].Spec.IsIdentity ? count : produced;
 
-            if (producedX != produced)
+            if (producedX != expected)
             {
                 throw new InvalidOperationException(
                     "Internal error: the series and a regressor differenced to different lengths.");
+            }
+
+            if (_xTransforms[i].Spec.IsIdentity && skip > 0)
+            {
+                Array.Copy(_xScratch[i], skip, _xScratch[i], 0, produced);
             }
         }
 
@@ -234,7 +245,7 @@ internal sealed class ArimaScan
         _moments.Scale(lambda);
     }
 
-    private const int StateVersion = 2;
+    private const int StateVersion = 3;
 
     /// <summary>
     /// Writes the complete scan state — transforms, windows, accumulators, offsets, tail
@@ -257,6 +268,7 @@ internal sealed class ArimaScan
         writer.Write(_layout.LagDepth);
         writer.Write(_layout.ExogenousLags);
         writer.Write(_r);
+        writer.Write((int)_options.RegressorDifferencing);
 
         _yTransform.WriteState(writer);
         foreach (var transform in _xTransforms)
@@ -311,10 +323,12 @@ internal sealed class ArimaScan
         var lagDepth = reader.ReadInt32();
         var exogenousLags = reader.ReadInt32();
         var r = reader.ReadInt32();
+        var regressorDifferencing = (RegressorDifferencing)reader.ReadInt32();
 
         if (p != _p || d != _options.Order.D || q != _q || seasonalD != _options.Seasonal.D
             || period != _options.Seasonal.Period || intercept != _options.IncludeIntercept
-            || lagDepth != _layout.LagDepth || exogenousLags != _layout.ExogenousLags || r != _r)
+            || lagDepth != _layout.LagDepth || exogenousLags != _layout.ExogenousLags || r != _r
+            || regressorDifferencing != _options.RegressorDifferencing)
         {
             throw new InvalidDataException(
                 $"Saved state is for ARIMA({p},{d},{q}) seasonal ({seasonalD})[{period}], intercept {intercept}, " +
@@ -380,6 +394,7 @@ internal sealed class ArimaScan
             || candidate.Differencing != _options.Differencing
             || candidate.IncludeIntercept != _options.IncludeIntercept
             || candidate.LjungBoxLags != _options.LjungBoxLags
+            || candidate.RegressorDifferencing != _options.RegressorDifferencing
             || candidate.GramDepth > _layout.LagDepth)
         {
             throw new ArgumentException(

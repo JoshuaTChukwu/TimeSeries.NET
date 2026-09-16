@@ -287,6 +287,30 @@ public sealed class DbTimeSeriesSourceTests : IDisposable
     }
 
     [Fact]
+    public async Task RegressorOnlyQuery_FeedsFutureRegressorsFromAScenarioView()
+    {
+        // The scenario view holds assumed macro paths and no target; the forecast reads it.
+        var x1 = SeriesGenerator.Uniform(40, seed: 21);
+        var x2 = SeriesGenerator.Uniform(40, seed: 22);
+        _db.CreateSeriesTable("scenario", SqliteDatabase.Daily(new double[40], x1: x1, x2: x2));
+        _db.Execute("CREATE VIEW vw_scenario AS SELECT ts, x1, x2 FROM scenario");
+
+        var source = Source("scenario", new DbSeriesQuery
+        {
+            CommandText = "SELECT ts, x1, x2 FROM vw_scenario ORDER BY ts",
+            ValueColumn = null,
+            ExogenousColumns = ["x1", "x2"],
+            TimeColumn = "ts",
+        }, new DbSourceOptions { ExpectedStep = TimeSpan.FromDays(1) });
+
+        var future = await ExogenousMatrix.FromSourceAsync(source);
+
+        Assert.Equal(40, future.Count);
+        Assert.Equal(ExogenousMatrix.FromColumns(x1, x2).Values.ToArray(), future.Values.ToArray());
+        Assert.Throws<ArgumentException>(() => new DbSeriesQuery { CommandText = "x", ValueColumn = null }.Validate());
+    }
+
+    [Fact]
     public void Construction_Validation()
     {
         Assert.Throws<ArgumentNullException>(() => new DbTimeSeriesSource(null!, new DbSeriesQuery { CommandText = "x" }));

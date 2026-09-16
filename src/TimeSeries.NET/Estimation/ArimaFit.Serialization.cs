@@ -8,7 +8,7 @@ namespace TimeSeries;
 public sealed partial class ArimaFit
 {
     private const string Magic = "TSAF";
-    private const int FormatVersion = 2;
+    private const int FormatVersion = 3;
 
     /// <summary>
     /// Writes the fit — coefficients, diagnostics, window and the bounded forecasting
@@ -40,6 +40,7 @@ public sealed partial class ArimaFit
         writer.Write(Options.ForgettingFactor);
         writer.Write(Options.Frequency.HasValue ? (int)Options.Frequency.Value : 0);
         writer.Write(Options.LjungBoxLags);
+        writer.Write((int)Options.RegressorDifferencing);
 
         // Coefficients
         WriteArray(writer, _phi);
@@ -135,6 +136,7 @@ public sealed partial class ArimaFit
         var forgetting = reader.ReadDouble();
         var frequency = reader.ReadInt32();
         var optionLjungBoxLags = reader.ReadInt32();
+        var optionRegressorDifferencing = (RegressorDifferencing)reader.ReadInt32();
 
         var options = new ArimaOptions
         {
@@ -147,6 +149,7 @@ public sealed partial class ArimaFit
             ForgettingFactor = forgetting,
             Frequency = frequency == 0 ? null : (SeriesFrequency)frequency,
             LjungBoxLags = optionLjungBoxLags,
+            RegressorDifferencing = optionRegressorDifferencing,
         };
 
         var phi = ReadArray(reader);
@@ -199,7 +202,7 @@ public sealed partial class ArimaFit
         var regressorStates = new IntegrationState[reader.ReadInt32()];
         for (var i = 0; i < regressorStates.Length; i++)
         {
-            regressorStates[i] = new IntegrationState(spec, ReadArray(reader));
+            regressorStates[i] = new IntegrationState(options.RegressorSpec, ReadArray(reader));
         }
 
         var recentValues = ReadArray(reader);

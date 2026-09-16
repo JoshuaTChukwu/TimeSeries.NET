@@ -15,8 +15,11 @@ namespace TimeSeries.Data.MongoDb;
 /// </remarks>
 public sealed record MongoSeriesQuery
 {
-    /// <summary>The field holding the observed value. Default <c>value</c>.</summary>
-    public string ValueField { get; init; } = "value";
+    /// <summary>
+    /// The field holding the observed value. Default <c>value</c>. Null makes this a
+    /// regressor-only query for <see cref="ExogenousMatrix.FromSourceAsync"/>.
+    /// </summary>
+    public string? ValueField { get; init; } = "value";
 
     /// <summary>Fields holding exogenous regressors, in the order the model will see them.</summary>
     public IReadOnlyList<string> ExogenousFields { get; init; } = [];
@@ -50,9 +53,14 @@ public sealed record MongoSeriesQuery
     /// <exception cref="ArgumentOutOfRangeException"><see cref="BatchSize"/> is below 1.</exception>
     public void Validate()
     {
-        if (string.IsNullOrWhiteSpace(ValueField))
+        if (ValueField is not null && string.IsNullOrWhiteSpace(ValueField))
         {
-            throw new ArgumentException("ValueField is required.", nameof(ValueField));
+            throw new ArgumentException("ValueField must name a field, or be null for a regressor-only query.", nameof(ValueField));
+        }
+
+        if (ValueField is null && ExogenousFields.Count == 0)
+        {
+            throw new ArgumentException("A query needs a ValueField, ExogenousFields, or both.", nameof(ValueField));
         }
 
         if (BatchSize < 1)
@@ -60,7 +68,12 @@ public sealed record MongoSeriesQuery
             throw new ArgumentOutOfRangeException(nameof(BatchSize), BatchSize, "Batch size must be at least 1.");
         }
 
-        var names = new HashSet<string>(StringComparer.Ordinal) { ValueField };
+        var names = new HashSet<string>(StringComparer.Ordinal);
+
+        if (ValueField is not null)
+        {
+            names.Add(ValueField);
+        }
 
         foreach (var field in ExogenousFields)
         {

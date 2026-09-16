@@ -1,3 +1,5 @@
+using TimeSeries.Data;
+
 namespace TimeSeries;
 
 /// <summary>
@@ -104,6 +106,51 @@ public sealed class ExogenousMatrix
         }
 
         return new ExogenousMatrix(values, columns.Length);
+    }
+
+    /// <summary>
+    /// Reads every batch of a source and keeps only its regressors.
+    /// </summary>
+    /// <remarks>
+    /// This is how the future regressor values an ARIMAX forecast needs come out of the
+    /// consumer's database: a scenario table or view holding the assumed paths — a
+    /// <c>DbSeriesQuery</c> with no <c>ValueColumn</c> — read through the same adapter as
+    /// the history. The library never extrapolates regressors; the scenario is the
+    /// consumer's statement of what they assume.
+    /// </remarks>
+    /// <param name="source">A source with at least one regressor. Its values, if any, are ignored.</param>
+    /// <param name="cancellationToken">Checked at every batch boundary.</param>
+    /// <returns>The regressors, row for row, in scan order.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is null.</exception>
+    /// <exception cref="ArgumentException"><paramref name="source"/> carries no regressors.</exception>
+    public static async ValueTask<ExogenousMatrix> FromSourceAsync(ITimeSeriesSource source, CancellationToken cancellationToken = default)
+    {
+        if (source is null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+
+        if (source.RegressorCount < 1)
+        {
+            throw new ArgumentException("The source carries no regressors.", nameof(source));
+        }
+
+        var values = new List<double>();
+        var cursor = await source.OpenAsync(cancellationToken).ConfigureAwait(false);
+
+        try
+        {
+            while (await cursor.ReadAsync(cancellationToken).ConfigureAwait(false))
+            {
+                values.AddRange(cursor.Current.Exogenous.ToArray());
+            }
+        }
+        finally
+        {
+            await cursor.DisposeAsync().ConfigureAwait(false);
+        }
+
+        return new ExogenousMatrix(values.ToArray(), source.RegressorCount);
     }
 
     /// <summary>

@@ -1,5 +1,24 @@
 namespace TimeSeries;
 
+/// <summary>How exogenous regressors enter a differenced model.</summary>
+public enum RegressorDifferencing
+{
+    /// <summary>
+    /// Regressors are differenced by the same operator as the series, so with <c>d = 1</c>
+    /// the model relates changes to changes. The regression-with-ARIMA-errors convention;
+    /// the default.
+    /// </summary>
+    SameAsSeries,
+
+    /// <summary>
+    /// Regressors enter undifferenced: with <c>d = 1</c>, changes in the series are driven
+    /// by the <em>levels</em> of the regressors — public debt changes by the level of the
+    /// deficit, the interest rate and growth; default rates by the level of unemployment.
+    /// Right when the regressors are stationary and act on the series' rate of change.
+    /// </summary>
+    None,
+}
+
 /// <summary>
 /// Everything that describes an ARIMA or ARIMAX model before it is fitted. Immutable;
 /// share freely.
@@ -56,6 +75,12 @@ public sealed record ArimaOptions
     /// as <c>ForecastHorizon.Years(2)</c>; a horizon in periods never needs it.
     /// </summary>
     public SeriesFrequency? Frequency { get; init; }
+
+    /// <summary>
+    /// Whether regressors are differenced with the series or enter as levels. Default
+    /// <see cref="RegressorDifferencing.SameAsSeries"/>. Irrelevant when <c>d = D = 0</c>.
+    /// </summary>
+    public RegressorDifferencing RegressorDifferencing { get; init; } = RegressorDifferencing.SameAsSeries;
 
     /// <summary>
     /// The number of residual autocorrelations <c>K</c> the Ljung-Box test examines.
@@ -135,6 +160,10 @@ public sealed record ArimaOptions
 
     /// <summary>The combined differencing operator this model applies.</summary>
     internal Transforms.DifferenceSpec Differencing => new(Order.D, Seasonal.D, Seasonal.Period);
+
+    /// <summary>The differencing applied to regressors: the series' own, or none.</summary>
+    internal Transforms.DifferenceSpec RegressorSpec =>
+        RegressorDifferencing == RegressorDifferencing.None ? Transforms.DifferenceSpec.None : Differencing;
 
     /// <summary>
     /// The pilot orders considered: the fixed one, or <c>p + q .. MaxPilotOrder</c>.

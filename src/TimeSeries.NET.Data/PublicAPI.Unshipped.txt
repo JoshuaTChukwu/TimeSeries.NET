@@ -19,7 +19,7 @@ TimeSeries.Data.DbSeriesQuery.Parameters.get -> System.Collections.Generic.IDict
 TimeSeries.Data.DbSeriesQuery.TimeColumn.get -> string?
 TimeSeries.Data.DbSeriesQuery.TimeColumn.init -> void
 TimeSeries.Data.DbSeriesQuery.Validate() -> void
-TimeSeries.Data.DbSeriesQuery.ValueColumn.get -> string!
+TimeSeries.Data.DbSeriesQuery.ValueColumn.get -> string?
 TimeSeries.Data.DbSeriesQuery.ValueColumn.init -> void
 TimeSeries.Data.DbTimeSeriesSource
 TimeSeries.Data.DbTimeSeriesSource.DbTimeSeriesSource(System.Func<System.Data.Common.DbConnection!>! connectionFactory, TimeSeries.Data.DbSeriesQuery! query, TimeSeries.Data.DbSourceOptions? options = null) -> void

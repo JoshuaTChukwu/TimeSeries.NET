@@ -20,7 +20,7 @@ TimeSeries.Data.MongoDb.MongoSeriesQuery.Sort.init -> void
 TimeSeries.Data.MongoDb.MongoSeriesQuery.TimeField.get -> string?
 TimeSeries.Data.MongoDb.MongoSeriesQuery.TimeField.init -> void
 TimeSeries.Data.MongoDb.MongoSeriesQuery.Validate() -> void
-TimeSeries.Data.MongoDb.MongoSeriesQuery.ValueField.get -> string!
+TimeSeries.Data.MongoDb.MongoSeriesQuery.ValueField.get -> string?
 TimeSeries.Data.MongoDb.MongoSeriesQuery.ValueField.init -> void
 TimeSeries.Data.MongoDb.MongoTimeSeriesSource
 TimeSeries.Data.MongoDb.MongoTimeSeriesSource.IsGrouped.get -> bool

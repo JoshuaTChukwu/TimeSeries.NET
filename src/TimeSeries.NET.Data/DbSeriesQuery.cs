@@ -23,8 +23,13 @@ public sealed record DbSeriesQuery
     /// <summary>The SQL to execute. Required.</summary>
     public string CommandText { get; init; } = string.Empty;
 
-    /// <summary>The column holding the observed value. Default <c>value</c>.</summary>
-    public string ValueColumn { get; init; } = "value";
+    /// <summary>
+    /// The column holding the observed value. Default <c>value</c>. Null makes this a
+    /// regressor-only query — a scenario view of future macro paths, say — for
+    /// <see cref="ExogenousMatrix.FromSourceAsync"/>; such a source carries zeros as values
+    /// and is not something to fit.
+    /// </summary>
+    public string? ValueColumn { get; init; } = "value";
 
     /// <summary>Columns holding exogenous regressors, in the order the model will see them.</summary>
     public IReadOnlyList<string> ExogenousColumns { get; init; } = [];
@@ -61,9 +66,14 @@ public sealed record DbSeriesQuery
             throw new ArgumentException("CommandText is required.", nameof(CommandText));
         }
 
-        if (string.IsNullOrWhiteSpace(ValueColumn))
+        if (ValueColumn is not null && string.IsNullOrWhiteSpace(ValueColumn))
         {
-            throw new ArgumentException("ValueColumn is required.", nameof(ValueColumn));
+            throw new ArgumentException("ValueColumn must name a column, or be null for a regressor-only query.", nameof(ValueColumn));
+        }
+
+        if (ValueColumn is null && ExogenousColumns.Count == 0)
+        {
+            throw new ArgumentException("A query needs a ValueColumn, ExogenousColumns, or both.", nameof(ValueColumn));
         }
 
         if (BatchSize < 1)
@@ -71,7 +81,12 @@ public sealed record DbSeriesQuery
             throw new ArgumentOutOfRangeException(nameof(BatchSize), BatchSize, "Batch size must be at least 1.");
         }
 
-        var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ValueColumn };
+        var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        if (ValueColumn is not null)
+        {
+            names.Add(ValueColumn);
+        }
 
         foreach (var column in ExogenousColumns)
         {

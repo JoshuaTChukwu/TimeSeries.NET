@@ -211,3 +211,26 @@ public class StreamingFitTests
         Assert.Equal(expected.Seed.Integration.Tail.ToArray(), actual.Seed.Integration.Tail.ToArray());
     }
 }
+
+public class ExogenousFromSourceTests
+{
+    [Fact]
+    public async Task ReadsRegressorsRowForRow_IgnoringValues()
+    {
+        var x = ExogenousMatrix.FromColumns(SeriesGenerator.Uniform(1_000, seed: 1), SeriesGenerator.Uniform(1_000, seed: 2));
+        var source = new ArraySource(new double[1_000], x, batchSize: 128);
+
+        var read = await ExogenousMatrix.FromSourceAsync(source);
+
+        Assert.Equal(x.Count, read.Count);
+        Assert.Equal(x.RegressorCount, read.RegressorCount);
+        Assert.Equal(x.Values.ToArray(), read.Values.ToArray());
+    }
+
+    [Fact]
+    public async Task RequiresRegressors()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() => ExogenousMatrix.FromSourceAsync(new ArraySource(new double[10])).AsTask());
+        await Assert.ThrowsAsync<ArgumentNullException>(() => ExogenousMatrix.FromSourceAsync(null!).AsTask());
+    }
+}

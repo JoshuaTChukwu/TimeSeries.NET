@@ -96,8 +96,13 @@ public sealed class DbSeriesCursor : ITimeSeriesCursor, IGroupedTimeSeriesCursor
 
         _reader = await _command.ExecuteReaderAsync(CommandBehavior.SequentialAccess, cancellationToken).ConfigureAwait(false);
 
-        var valueOrdinal = _reader.GetOrdinal(query.ValueColumn);
-        var columns = new List<Column> { new(valueOrdinal, Role.Value, 0, NumericReader(_reader, valueOrdinal)) };
+        var columns = new List<Column>();
+
+        if (query.ValueColumn is not null)
+        {
+            var valueOrdinal = _reader.GetOrdinal(query.ValueColumn);
+            columns.Add(new Column(valueOrdinal, Role.Value, 0, NumericReader(_reader, valueOrdinal)));
+        }
 
         for (var i = 0; i < query.ExogenousColumns.Count; i++)
         {
@@ -202,7 +207,7 @@ public sealed class DbSeriesCursor : ITimeSeriesCursor, IGroupedTimeSeriesCursor
             switch (column.Role)
             {
                 case Role.Value:
-                    _rowValue = ReadNumeric(reader, column, _source.Query.ValueColumn);
+                    _rowValue = ReadNumeric(reader, column, _source.Query.ValueColumn!);
                     break;
 
                 case Role.Exogenous:

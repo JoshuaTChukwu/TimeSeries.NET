@@ -151,6 +151,52 @@ public class ParameterRecoveryTests
     }
 
     [Fact]
+    public void LevelRegressorsOnADifferencedSeries_RecoverBeta_WhateverTheBatching()
+    {
+        // dy_t = 0.1 + 0.4 dy_(t-1) + 0.8 u_t + e_t with u_t a stationary level: the debt
+        // dynamics shape. Differencing u as well would put beta on du_t and miss.
+        const double Beta = 0.8;
+        var u = SeriesGenerator.Ar1(N + 1, 0.6, seed: 71);
+        var e = SeriesGenerator.Gaussian(N + 1, seed: 72);
+        var dy = new double[N + 1];
+        for (var t = 1; t <= N; t++)
+        {
+            dy[t] = 0.1 + (0.4 * dy[t - 1]) + (Beta * u[t]) + e[t];
+        }
+
+        var y = SeriesGenerator.Integrate(dy.Skip(1).ToArray(), 1, level: 50);
+        var x = ExogenousMatrix.FromColumn(u);
+        var options = new ArimaOptions { Order = new(1, 1, 0), RegressorDifferencing = RegressorDifferencing.None };
+
+        var fit = new ArimaModel(options).Fit(y, x);
+        Assert.Equal(Beta, fit.ExogenousCoefficients.Span[0], 2.5 * fit.StandardErrors.Span[2]);
+        Assert.Equal(0.4, fit.AutoRegressive.Span[0], 2.5 * fit.StandardErrors.Span[1]);
+
+        // Alignment survives batch boundaries: the level regressor must be read at the raw
+        // row its differenced value came from, whatever the batch size.
+        var scan = new ArimaScan(options, regressorCount: 1);
+        for (var start = 0; start < y.Length; start += 7)
+        {
+            var take = Math.Min(7, y.Length - start);
+            scan.Accept(y.AsSpan(start, take), x.Rows(start, take));
+        }
+
+        var batched = scan.Solve(new FitWindow(0, y.Length));
+        Assert.Equal(fit.ExogenousCoefficients.ToArray(), batched.ExogenousCoefficients.ToArray());
+
+        // The other convention fits the same data without error — it answers a different
+        // question (changes on changes), so its beta is not compared with this one.
+        var differenced = new ArimaModel(options with { RegressorDifferencing = RegressorDifferencing.SameAsSeries }).Fit(y, x);
+        Assert.True(differenced.Diagnostics.IsStationary);
+
+        // Forecast: level regressors pass through undifferenced.
+        var future = ExogenousMatrix.FromColumn([1.0, 1.0]);
+        var forecast = fit.Forecast(ForecastHorizon.Periods(2), future);
+        var expectedStep1 = y[^1] + fit.Intercept + (fit.AutoRegressive.Span[0] * (y[^1] - y[^2])) + (fit.ExogenousCoefficients.Span[0] * 1.0);
+        Assert.Equal(expectedStep1, forecast.Mean.Span[0], 1e-9);
+    }
+
+    [Fact]
     public void ErrorShrinksAsTheSeriesGrows()
     {
         const double Phi = 0.6;
