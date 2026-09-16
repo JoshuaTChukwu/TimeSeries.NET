@@ -1,0 +1,30 @@
+#nullable enable
+TimeSeries.Data.MongoDb.MongoSeriesCursor
+TimeSeries.Data.MongoDb.MongoSeriesCursor.Current.get -> TimeSeries.Data.SeriesBatch
+TimeSeries.Data.MongoDb.MongoSeriesCursor.DisposeAsync() -> System.Threading.Tasks.ValueTask
+TimeSeries.Data.MongoDb.MongoSeriesCursor.DocumentsRead.get -> long
+TimeSeries.Data.MongoDb.MongoSeriesCursor.ReadAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<bool>
+TimeSeries.Data.MongoDb.MongoSeriesQuery
+TimeSeries.Data.MongoDb.MongoSeriesQuery.BatchSize.get -> int
+TimeSeries.Data.MongoDb.MongoSeriesQuery.BatchSize.init -> void
+TimeSeries.Data.MongoDb.MongoSeriesQuery.ExogenousFields.get -> System.Collections.Generic.IReadOnlyList<string!>!
+TimeSeries.Data.MongoDb.MongoSeriesQuery.ExogenousFields.init -> void
+TimeSeries.Data.MongoDb.MongoSeriesQuery.Filter.get -> MongoDB.Driver.FilterDefinition<MongoDB.Bson.BsonDocument!>?
+TimeSeries.Data.MongoDb.MongoSeriesQuery.Filter.init -> void
+TimeSeries.Data.MongoDb.MongoSeriesQuery.KeyField.get -> string?
+TimeSeries.Data.MongoDb.MongoSeriesQuery.KeyField.init -> void
+TimeSeries.Data.MongoDb.MongoSeriesQuery.Pipeline.get -> MongoDB.Driver.PipelineDefinition<MongoDB.Bson.BsonDocument!, MongoDB.Bson.BsonDocument!>?
+TimeSeries.Data.MongoDb.MongoSeriesQuery.Pipeline.init -> void
+TimeSeries.Data.MongoDb.MongoSeriesQuery.Sort.get -> MongoDB.Driver.SortDefinition<MongoDB.Bson.BsonDocument!>?
+TimeSeries.Data.MongoDb.MongoSeriesQuery.Sort.init -> void
+TimeSeries.Data.MongoDb.MongoSeriesQuery.TimeField.get -> string?
+TimeSeries.Data.MongoDb.MongoSeriesQuery.TimeField.init -> void
+TimeSeries.Data.MongoDb.MongoSeriesQuery.Validate() -> void
+TimeSeries.Data.MongoDb.MongoSeriesQuery.ValueField.get -> string?
+TimeSeries.Data.MongoDb.MongoSeriesQuery.ValueField.init -> void
+TimeSeries.Data.MongoDb.MongoTimeSeriesSource
+TimeSeries.Data.MongoDb.MongoTimeSeriesSource.IsGrouped.get -> bool
+TimeSeries.Data.MongoDb.MongoTimeSeriesSource.MongoTimeSeriesSource(MongoDB.Driver.IMongoCollection<MongoDB.Bson.BsonDocument!>! collection, TimeSeries.Data.MongoDb.MongoSeriesQuery! query, TimeSeries.Data.DbSourceOptions? options = null) -> void
+TimeSeries.Data.MongoDb.MongoTimeSeriesSource.Options.get -> TimeSeries.Data.DbSourceOptions!
+TimeSeries.Data.MongoDb.MongoTimeSeriesSource.Query.get -> TimeSeries.Data.MongoDb.MongoSeriesQuery!
+TimeSeries.Data.MongoDb.MongoTimeSeriesSource.RegressorCount.get -> int

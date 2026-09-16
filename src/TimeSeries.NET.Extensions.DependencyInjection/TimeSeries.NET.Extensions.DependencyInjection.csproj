@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>TimeSeries.Extensions.DependencyInjection</RootNamespace>
+    <AssemblyName>TimeSeries.NET.Extensions.DependencyInjection</AssemblyName>
+    <PackageId>TimeSeries.NET.Extensions.DependencyInjection</PackageId>
+    <Description>
+      Registers TimeSeries.NET estimators with Microsoft.Extensions.DependencyInjection.
+     Licensed for non-commercial use; contributors and commercial licensees may use it commercially. See LICENSE.txt.
+    </Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TimeSeries.NET\TimeSeries.NET.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+</Project>

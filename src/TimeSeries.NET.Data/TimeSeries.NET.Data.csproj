@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>TimeSeries.Data</RootNamespace>
+    <AssemblyName>TimeSeries.NET.Data</AssemblyName>
+    <PackageId>TimeSeries.NET.Data</PackageId>
+    <Description>
+      Streams a time series into TimeSeries.NET straight from any ADO.NET provider —
+      Npgsql, SqlClient, Sqlite, MySqlConnector, Oracle, ClickHouse, DuckDB — through
+      System.Data.Common.DbDataReader. No provider is referenced; you already have yours.
+     Licensed for non-commercial use; contributors and commercial licensees may use it commercially. See LICENSE.txt.
+    </Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TimeSeries.NET\TimeSeries.NET.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TimeSeries.NET.Data.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,988 @@
+<title>TimeSeries.NET Specification</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --ground:      #edeff3;
+    --surface:     #ffffff;
+    --surface-2:   #f5f7fa;
+    --ink:         #151a24;
+    --ink-2:       #4a5665;
+    --ink-3:       #77808f;
+    --rule:        #d3d9e2;
+    --rule-soft:   #e3e8ee;
+    --accent:      #4b31c8;
+    --accent-ink:  #3a26a0;
+    --accent-soft: #ece8fb;
+    --settled:     #1d6f4c;
+    --settled-bg:  #e1f1e8;
+    --open:        #8a5a06;
+    --open-bg:     #faefd9;
+    --defer:       #5b6470;
+    --defer-bg:    #e5e9ee;
+    --code-bg:     #f5f7fa;
+    --code-ink:    #23303f;
+
+    --f-display: "Spectral", Georgia, "Times New Roman", serif;
+    --f-body:    "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --f-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0f1218;
+      --surface:     #161a22;
+      --surface-2:   #1c212b;
+      --ink:         #e5e9f0;
+      --ink-2:       #9aa5b5;
+      --ink-3:       #6f7a8a;
+      --rule:        #29303c;
+      --rule-soft:   #222833;
+      --accent:      #9e8cff;
+      --accent-ink:  #b8abff;
+      --accent-soft: #221f3a;
+      --settled:     #54c08c;
+      --settled-bg:  #14291f;
+      --open:        #dda544;
+      --open-bg:     #2b2312;
+      --defer:       #8a93a0;
+      --defer-bg:    #222833;
+      --code-bg:     #1b202a;
+      --code-ink:    #cdd6e2;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      #0f1218;
+    --surface:     #161a22;
+    --surface-2:   #1c212b;
+    --ink:         #e5e9f0;
+    --ink-2:       #9aa5b5;
+    --ink-3:       #6f7a8a;
+    --rule:        #29303c;
+    --rule-soft:   #222833;
+    --accent:      #9e8cff;
+    --accent-ink:  #b8abff;
+    --accent-soft: #221f3a;
+    --settled:     #54c08c;
+    --settled-bg:  #14291f;
+    --open:        #dda544;
+    --open-bg:     #2b2312;
+    --defer:       #8a93a0;
+    --defer-bg:    #222833;
+    --code-bg:     #1b202a;
+    --code-ink:    #cdd6e2;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: 15px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell {
+    max-width: 1220px;
+    margin: 0 auto;
+    padding: 0 28px 120px;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 52px 0 26px;
+    margin-bottom: 40px;
+  }
+  .eyebrow {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+  .masthead h1 {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: clamp(2.2rem, 5vw, 3.15rem);
+    line-height: 1.06;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin: 0 0 14px;
+  }
+  .standfirst {
+    font-size: 1.06rem;
+    color: var(--ink-2);
+    max-width: 60ch;
+    margin: 0 0 30px;
+  }
+  .docmeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 38px;
+    font-family: var(--f-mono);
+    font-size: 11.5px;
+    color: var(--ink-3);
+  }
+  .docmeta div { display: flex; gap: 8px; }
+  .docmeta dt { letter-spacing: 0.08em; text-transform: uppercase; }
+  .docmeta dd { margin: 0; color: var(--ink); font-weight: 500; }
+
+  /* ---------- page grid ---------- */
+
+  .grid {
+    display: grid;
+    grid-template-columns: 208px minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+
+  .rail { position: sticky; top: 28px; }
+  .rail p {
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+  .rail a {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 4px;
+    padding: 4px 6px 4px 0;
+    font-size: 12.5px;
+    color: var(--ink-2);
+    text-decoration: none;
+    border-radius: 3px;
+  }
+  .rail a span:first-child {
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+    padding-top: 2px;
+  }
+  .rail a:hover { color: var(--accent); background: var(--accent-soft); }
+  .rail a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  /* ---------- sections ---------- */
+
+  .main > section { margin-bottom: 60px; scroll-margin-top: 24px; }
+
+  h2 {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.62rem;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    text-wrap: balance;
+    margin: 0 0 8px;
+    padding-top: 6px;
+    border-top: 1px solid var(--rule);
+  }
+  h2 .num {
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    display: block;
+    margin-bottom: 9px;
+  }
+  h3 {
+    font-family: var(--f-body);
+    font-weight: 600;
+    font-size: 0.97rem;
+    letter-spacing: 0.005em;
+    margin: 30px 0 8px;
+  }
+  h3 .sub {
+    font-family: var(--f-mono);
+    font-weight: 400;
+    font-size: 0.74rem;
+    color: var(--ink-3);
+    margin-right: 9px;
+  }
+
+  .main p, .main ul, .main ol.body-list { max-width: 72ch; }
+  .main p { margin: 0 0 14px; }
+  .lede { color: var(--ink-2); font-size: 1rem; margin-bottom: 22px !important; }
+
+  .main ul, .main ol.body-list { margin: 0 0 16px; padding-left: 20px; }
+  .main li { margin-bottom: 7px; }
+  .main li::marker { color: var(--ink-3); }
+
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  strong { font-weight: 600; }
+
+  code {
+    font-family: var(--f-mono);
+    font-size: 0.855em;
+    background: var(--surface-2);
+    border: 1px solid var(--rule-soft);
+    border-radius: 3px;
+    padding: 0.1em 0.34em;
+    color: var(--code-ink);
+  }
+
+  pre {
+    font-family: var(--f-mono);
+    font-size: 12.3px;
+    line-height: 1.66;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border: 1px solid var(--rule);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 4px 4px 0;
+    padding: 16px 18px;
+    margin: 0 0 18px;
+    overflow-x: auto;
+  }
+  pre code { background: none; border: 0; padding: 0; font-size: inherit; color: inherit; }
+  .k { color: var(--accent); }
+  .c { color: var(--ink-3); font-style: italic; }
+
+  /* ---------- tables ---------- */
+
+  .tablewrap { overflow-x: auto; margin: 0 0 20px; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.2px; }
+  th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  thead th {
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  td code { font-size: 11.8px; white-space: nowrap; }
+  .num-cell { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ---------- chips ---------- */
+
+  .chip {
+    display: inline-block;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .chip-settled { color: var(--settled); background: var(--settled-bg); }
+  .chip-open    { color: var(--open);    background: var(--open-bg); }
+  .chip-defer   { color: var(--defer);   background: var(--defer-bg); }
+
+  /* ---------- callout ---------- */
+
+  .note {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-top: 2px solid var(--accent);
+    border-radius: 0 0 4px 4px;
+    padding: 15px 18px 4px;
+    margin: 0 0 20px;
+    max-width: 72ch;
+  }
+  .note .label {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 7px;
+  }
+  .note p { font-size: 14px; }
+
+  /* ---------- pipeline ---------- */
+
+  .pipeline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 7px;
+    margin: 4px 0 22px;
+  }
+  .stage {
+    flex: 1 1 128px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 11px 12px;
+  }
+  .stage .st-n {
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 5px;
+  }
+  .stage .st-t { font-weight: 600; font-size: 12.6px; display: block; margin-bottom: 3px; }
+  .stage .st-d { font-size: 11.6px; color: var(--ink-2); line-height: 1.45; }
+  .arrow { align-self: center; color: var(--ink-3); font-family: var(--f-mono); font-size: 13px; }
+
+  /* ---------- key/value strip ---------- */
+
+  .kv {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--surface);
+    margin: 0 0 20px;
+  }
+  .kv > div { padding: 13px 15px; border-right: 1px solid var(--rule-soft); }
+  .kv > div:last-child { border-right: 0; }
+  .kv dt {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 5px;
+  }
+  .kv dd {
+    margin: 0;
+    font-family: var(--f-mono);
+    font-size: 15px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+  .kv dd small { display: block; font-family: var(--f-body); font-size: 11.5px; font-weight: 400; color: var(--ink-2); margin-top: 3px; letter-spacing: 0; }
+
+  /* ---------- footer ---------- */
+
+  .colophon {
+    border-top: 2px solid var(--ink);
+    margin-top: 12px;
+    padding-top: 18px;
+    font-family: var(--f-mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 28px;
+  }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; gap: 32px; }
+    .rail { position: static; }
+    .rail ol { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); display: grid; }
+    .shell { padding: 0 20px 80px; }
+    .masthead { padding-top: 34px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="shell">
+
+  <header class="masthead">
+    <p class="eyebrow">Library specification · Draft 1</p>
+    <h1>TimeSeries.NET</h1>
+    <p class="standfirst">A dependency-free .NET library for ARIMA and ARIMAX forecasting, fitted either from memory or streamed directly from the customer's database. Installed as a NuGet package; nothing is hosted.</p>
+    <dl class="docmeta">
+      <div><dt>Target</dt><dd>net8.0</dd></div>
+      <div><dt>Repo</dt><dd>joshuatchukwu/TimeSeries.NET</dd></div>
+      <div><dt>Date</dt><dd>2026-09-15</dd></div>
+      <div><dt>Status</dt><dd>For review</dd></div>
+    </dl>
+  </header>
+
+  <div class="grid">
+
+    <nav class="rail" aria-label="Sections">
+      <p>Contents</p>
+      <ol>
+        <li><a href="#s1"><span>1</span><span>Scope</span></a></li>
+        <li><a href="#s2"><span>2</span><span>Packages</span></a></li>
+        <li><a href="#s3"><span>3</span><span>Public API</span></a></li>
+        <li><a href="#s4"><span>4</span><span>Estimation engine</span></a></li>
+        <li><a href="#s5"><span>5</span><span>Forecasting</span></a></li>
+        <li><a href="#s6"><span>6</span><span>Order selection</span></a></li>
+        <li><a href="#s7"><span>7</span><span>Data access</span></a></li>
+        <li><a href="#s8"><span>8</span><span>Incremental</span></a></li>
+        <li><a href="#s9"><span>9</span><span>Numerical contract</span></a></li>
+        <li><a href="#s10"><span>10</span><span>Errors &amp; validation</span></a></li>
+        <li><a href="#s11"><span>11</span><span>Testing</span></a></li>
+        <li><a href="#s12"><span>12</span><span>Packaging</span></a></li>
+        <li><a href="#s13"><span>13</span><span>Milestones</span></a></li>
+        <li><a href="#s14"><span>14</span><span>Open decisions</span></a></li>
+      </ol>
+    </nav>
+
+    <main class="main">
+
+      <!-- ============ 1 ============ -->
+      <section id="s1">
+        <h2><span class="num">Section 01</span>Scope</h2>
+        <p class="lede">One library, installed by the consumer, that fits an ARIMA or ARIMAX model to a series and returns a forecast over a caller-supplied horizon. The consumer's data never leaves their process.</p>
+
+        <h3><span class="sub">1.1</span>In scope</h3>
+        <ul>
+          <li>ARIMA(<em>p</em>,<em>d</em>,<em>q</em>) and ARIMAX — the same estimator, exogenous regressors optional. Non-seasonal and seasonally differenced, written <code>(1−B)<sup>d</sup>(1−B<sup>s</sup>)<sup>D</sup></code>.</li>
+          <li>Estimation by Hannan–Rissanen: consistent, closed-form, no optimiser, no dependency.</li>
+          <li>Forecasting to an arbitrary horizon — expressed in periods or in calendar time — with prediction intervals.</li>
+          <li>Two fitting paths from one engine: in-memory arrays for ordinary data, and a streaming path that reads from the consumer's database without materialising the series.</li>
+          <li>Many-series fitting: one ordered scan, one model per key.</li>
+          <li>Automatic order selection over a (<em>p</em>,<em>d</em>,<em>q</em>) grid.</li>
+          <li>ACF, PACF, differencing, error metrics (MAE, MSE, RMSE, MAPE, sMAPE) as supported public surface.</li>
+          <li>Incremental refit: fold new observations into a saved model state.</li>
+        </ul>
+
+        <h3><span class="sub">1.2</span>Not in scope for v1</h3>
+        <ul>
+          <li><strong>Exact maximum likelihood.</strong> Hannan–Rissanen is the estimator. It is consistent and noisier than MLE on short series; this is a deliberate trade for having no optimiser and no dependency.</li>
+          <li><strong>Seasonal AR/MA terms</strong> (the <em>P</em>, <em>Q</em> of SARIMA). Seasonal <em>differencing</em> ships in v1; seasonal polynomial terms are deferred.</li>
+          <li><strong>ETS, Holt–Winters, state-space models.</strong> Roadmap, not v1.</li>
+          <li><strong>Any hosted service, API, or dashboard.</strong> The library is the product.</li>
+          <li><strong>Writing to the consumer's database.</strong> Reads only.</li>
+          <li><strong>SQL generation.</strong> The consumer supplies the query; the library supplies the cursor. Anything more becomes an ORM that is wrong for somebody's schema and cannot be tested.</li>
+        </ul>
+      </section>
+
+      <!-- ============ 2 ============ -->
+      <section id="s2">
+        <h2><span class="num">Section 02</span>Packages and dependency rules</h2>
+        <p class="lede">The zero-dependency promise is a selling point and is enforced structurally: only one package in the set is allowed a third-party reference.</p>
+
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>Package</th><th>Contains</th><th>Dependencies</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>TimeSeries.NET</code></td>
+                <td>Models, estimator, forecasting, transforms, accumulators, metrics, and the source interfaces.</td>
+                <td>None.</td>
+              </tr>
+              <tr>
+                <td><code>TimeSeries.NET.Data</code></td>
+                <td><code>DbTimeSeriesSource</code> over <code>System.Data.Common.DbDataReader</code>.</td>
+                <td>None — <code>System.Data.Common</code> is in the BCL.</td>
+              </tr>
+              <tr>
+                <td><code>TimeSeries.NET.Data.MongoDb</code></td>
+                <td>Cursor source over an aggregation pipeline.</td>
+                <td><code>MongoDB.Driver</code>.</td>
+              </tr>
+              <tr>
+                <td><code>TimeSeries.NET.Extensions.DependencyInjection</code></td>
+                <td><code>AddTimeSeries()</code> registration helpers.</td>
+                <td><code>Microsoft.Extensions.DependencyInjection.Abstractions</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note">
+          <span class="label">Why one adapter covers most databases</span>
+          <p>Npgsql, Microsoft.Data.SqlClient, Microsoft.Data.Sqlite, MySqlConnector, Oracle.ManagedDataAccess, ClickHouse.Client and DuckDB.NET all derive from <code>DbDataReader</code>. A single adapter against that base class reaches every one of them and adds <em>no</em> dependency to anything. The consumer already references their own driver; the library never needs to. MongoDB is the only listed store whose cursor is not ADO.NET, so it is the only one that earns a package of its own.</p>
+        </div>
+
+        <h3><span class="sub">2.1</span>Namespace rename <span class="chip chip-open">Decision 2</span></h3>
+        <p>The current assembly is <code>TimeSeries.Core</code> with types under <code>TimeSeries.Core.Math</code>. That namespace shadows <code>System.Math</code> — which is why <code>Differencing.cs</code> has to spell out <code>System.Math.Exp</code> inside the library itself. Every consumer who writes <code>using TimeSeries.Core.Math;</code> inherits the same collision. Proposed:</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Now</th><th>Proposed</th><th>Holds</th></tr></thead>
+            <tbody>
+              <tr><td><code>TimeSeries.Core</code></td><td><code>TimeSeries</code></td><td>Models, options, results</td></tr>
+              <tr><td><code>TimeSeries.Core.Math</code></td><td><code>TimeSeries.Transforms</code></td><td>Differencing, integration state</td></tr>
+              <tr><td>—</td><td><code>TimeSeries.Statistics</code></td><td>ACF, PACF, moments, metrics</td></tr>
+              <tr><td>—</td><td><code>TimeSeries.Data</code></td><td>Source and cursor interfaces</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Cheap now, breaking later. The NuGet package id is <code>TimeSeries.NET</code> regardless.</p>
+      </section>
+
+      <!-- ============ 3 ============ -->
+      <section id="s3">
+        <h2><span class="num">Section 03</span>Public API surface</h2>
+        <p class="lede">Three objects carry the whole library: options describe the model, an estimator produces a fit, and the fit produces forecasts. The fit holds no data, so it can be serialised, shipped, and forecast from anywhere.</p>
+
+        <h3><span class="sub">3.1</span>Configuration</h3>
+<pre><code><span class="k">namespace</span> TimeSeries;
+
+<span class="k">public readonly record struct</span> ArimaOrder(<span class="k">int</span> P, <span class="k">int</span> D, <span class="k">int</span> Q);
+
+<span class="k">public readonly record struct</span> SeasonalOrder(<span class="k">int</span> D, <span class="k">int</span> Period)
+{
+    <span class="k">public static readonly</span> SeasonalOrder None = <span class="k">new</span>(0, 0);
+}
+
+<span class="k">public sealed record</span> ArimaOptions
+{
+    <span class="k">public</span> ArimaOrder     Order             { <span class="k">get</span>; <span class="k">init</span>; } = <span class="k">new</span>(1, 1, 1);
+    <span class="k">public</span> SeasonalOrder  Seasonal          { <span class="k">get</span>; <span class="k">init</span>; } = SeasonalOrder.None;
+    <span class="k">public bool</span>           IncludeIntercept  { <span class="k">get</span>; <span class="k">init</span>; } = <span class="k">true</span>;
+    <span class="k">public int</span>?           PilotOrder        { <span class="k">get</span>; <span class="k">init</span>; } = <span class="k">null</span>;   <span class="c">// m; null =&gt; chosen by AICc</span>
+    <span class="k">public int</span>            MaxPilotOrder     { <span class="k">get</span>; <span class="k">init</span>; } = 32;
+    <span class="k">public double</span>         Ridge             { <span class="k">get</span>; <span class="k">init</span>; } = 0d;
+    <span class="k">public double</span>         ForgettingFactor  { <span class="k">get</span>; <span class="k">init</span>; } = 1d;     <span class="c">// λ ∈ (0,1]</span>
+    <span class="k">public</span> SeriesFrequency? Frequency       { <span class="k">get</span>; <span class="k">init</span>; } = <span class="k">null</span>;   <span class="c">// enables calendar horizons</span>
+}</code></pre>
+
+        <h3><span class="sub">3.2</span>Estimator</h3>
+        <p>Per the standing decision, one class covers ARIMA and ARIMAX — they are the same model, and the presence of exogenous columns is the only difference. This supersedes the <code>ArimaxModel</code> shown in the current README.</p>
+<pre><code><span class="k">public sealed class</span> ArimaModel
+{
+    <span class="k">public</span> ArimaModel(ArimaOptions options);
+
+    <span class="c">// In memory — synchronous, no allocation beyond the accumulators.</span>
+    <span class="k">public</span> ArimaFit Fit(ReadOnlySpan&lt;<span class="k">double</span>&gt; series);
+    <span class="k">public</span> ArimaFit Fit(ReadOnlySpan&lt;<span class="k">double</span>&gt; series, ExogenousMatrix exogenous);
+
+    <span class="c">// Streaming — the series is never materialised.</span>
+    <span class="k">public</span> ValueTask&lt;ArimaFit&gt; FitAsync(IAsyncEnumerable&lt;<span class="k">double</span>&gt; series, CancellationToken ct = <span class="k">default</span>);
+    <span class="k">public</span> ValueTask&lt;ArimaFit&gt; FitAsync(ITimeSeriesSource source,        CancellationToken ct = <span class="k">default</span>);
+
+    <span class="c">// One ordered scan, one model per key.</span>
+    <span class="k">public</span> IAsyncEnumerable&lt;KeyedArimaFit&gt; FitManyAsync(IGroupedTimeSeriesSource source,
+                                                        CancellationToken ct = <span class="k">default</span>);
+}</code></pre>
+        <p>The synchronous overloads are wrappers: they feed the same accumulators the streaming path uses. There is one estimation code path in the library, not two.</p>
+
+        <h3><span class="sub">3.3</span>Fitted model</h3>
+<pre><code><span class="k">public sealed class</span> ArimaFit
+{
+    <span class="k">public</span> ArimaOrder            Order               { <span class="k">get</span>; }
+    <span class="k">public</span> SeasonalOrder         Seasonal            { <span class="k">get</span>; }
+    <span class="k">public</span> ReadOnlyMemory&lt;<span class="k">double</span>&gt; AutoRegressive      { <span class="k">get</span>; }   <span class="c">// φ₁ … φₚ</span>
+    <span class="k">public</span> ReadOnlyMemory&lt;<span class="k">double</span>&gt; MovingAverage       { <span class="k">get</span>; }   <span class="c">// θ₁ … θ_q</span>
+    <span class="k">public</span> ReadOnlyMemory&lt;<span class="k">double</span>&gt; ExogenousCoefficients { <span class="k">get</span>; } <span class="c">// β</span>
+    <span class="k">public double</span>                Intercept           { <span class="k">get</span>; }
+    <span class="k">public double</span>                InnovationVariance  { <span class="k">get</span>; }   <span class="c">// σ̂²</span>
+    <span class="k">public long</span>                  ObservationCount    { <span class="k">get</span>; }
+    <span class="k">public</span> ArimaDiagnostics      Diagnostics         { <span class="k">get</span>; }
+    <span class="k">public</span> FitWindow             Window              { <span class="k">get</span>; }   <span class="c">// what was fitted, for audit</span>
+
+    <span class="k">public</span> ForecastResult Forecast(ForecastHorizon horizon, ForecastOptions? options = <span class="k">null</span>);
+    <span class="k">public</span> ForecastResult Forecast(ForecastHorizon horizon, ExogenousMatrix future,
+                                   ForecastOptions? options = <span class="k">null</span>);
+
+    <span class="k">public void</span> WriteTo(Stream destination);
+    <span class="k">public static</span> ArimaFit ReadFrom(Stream source);
+}</code></pre>
+        <p>An <code>ArimaFit</code> for ARIMA(2,1,1) is roughly ten doubles plus a short tail of recent values — a few hundred bytes on the wire. It holds no reference to the series, the source, or the connection.</p>
+
+        <h3><span class="sub">3.4</span>End-to-end usage</h3>
+<pre><code><span class="k">var</span> source = <span class="k">new</span> DbTimeSeriesSource(
+    () =&gt; <span class="k">new</span> NpgsqlConnection(connectionString),
+    <span class="k">new</span> DbSeriesQuery
+    {
+        CommandText = <span class="c">"""
+            SELECT ts, close_px, vix
+            FROM   market.daily_bars
+            WHERE  symbol = @symbol AND ts &gt;= @from AND ts &lt; @to
+            ORDER  BY ts
+            """</span>,
+        ValueColumn      = <span class="c">"close_px"</span>,
+        ExogenousColumns = [<span class="c">"vix"</span>],
+        TimeColumn       = <span class="c">"ts"</span>,
+        Parameters       = { [<span class="c">"symbol"</span>] = <span class="c">"EURUSD"</span>, [<span class="c">"from"</span>] = from, [<span class="c">"to"</span>] = to },
+    });
+
+<span class="k">var</span> model = <span class="k">new</span> ArimaModel(<span class="k">new</span> ArimaOptions
+{
+    Order     = <span class="k">new</span>(2, 1, 1),
+    Frequency = SeriesFrequency.BusinessDaily,
+});
+
+ArimaFit fit = <span class="k">await</span> model.FitAsync(source, ct);
+
+ForecastResult next = fit.Forecast(ForecastHorizon.Years(2), futureVix);
+
+Console.WriteLine($<span class="c">"{next.Mean.Span[0]:F4}  [{next.Lower.Span[0]:F4}, {next.Upper.Span[0]:F4}]"</span>);</code></pre>
+      </section>
+
+      <!-- ============ 4 ============ -->
+      <section id="s4">
+        <h2><span class="num">Section 04</span>Estimation engine</h2>
+        <p class="lede">Hannan–Rissanen is conventionally described as two regressions run in sequence, implying two passes over the data. It can be done in one, because both stages are linear in the same lagged values.</p>
+
+        <h3><span class="sub">4.1</span>The single accumulator</h3>
+        <p>Stage two regresses <code>y<sub>t</sub></code> on lagged <code>y</code> and on pilot residuals <code>ê<sub>t−j</sub> = y<sub>t−j</sub> − Σ<sub>k</sub> φ̂<sub>k</sub> y<sub>t−j−k</sub></code>. Every regressor is therefore a linear combination of <code>y<sub>t−1</sub> … y<sub>t−L</sub></code> where <code>L = max(p, q + m)</code>. Accumulate the lag-augmented Gram matrix over <code>v<sub>t</sub> = (y<sub>t</sub>, …, y<sub>t−L</sub>)</code>:</p>
+<pre><code>G = Σ  v  v′        s = Σ  v         N = n − L
+     t   t  t             t   t</code></pre>
+        <p>Then, with <code>A</code> built from the pilot coefficients alone — column <em>i</em> of the AR block is <code>e<sub>i</sub></code>, column <em>j</em> of the MA block is <code>e<sub>j</sub> − Σ<sub>k</sub> φ̂<sub>k</sub> e<sub>j+k</sub></code>:</p>
+<pre><code>Z′Z = A′ G A          Z′y = A′ G e₀          y′y = G[0,0]</code></pre>
+        <p>The pilot AR(<em>m</em>) regression needs no separate work at all: its normal equations are the submatrix <code>G[1..m, 1..m]</code> with right-hand side <code>G[1..m, 0]</code>. Both stages, from one accumulator, in one pass.</p>
+
+        <div class="pipeline">
+          <div class="stage"><span class="st-n">01</span><span class="st-t">Batched cursor</span><span class="st-d">8 192 rows per await</span></div>
+          <span class="arrow">→</span>
+          <div class="stage"><span class="st-n">02</span><span class="st-t">Difference</span><span class="st-d">Ring buffer, d + D·s values</span></div>
+          <span class="arrow">→</span>
+          <div class="stage"><span class="st-n">03</span><span class="st-t">Accumulate</span><span class="st-d">Gram G, sums s, autocovariances γ̂</span></div>
+          <span class="arrow">→</span>
+          <div class="stage"><span class="st-n">04</span><span class="st-t">Solve</span><span class="st-d">Dense, no data access</span></div>
+          <span class="arrow">→</span>
+          <div class="stage"><span class="st-n">05</span><span class="st-t">Forecast state</span><span class="st-d">~10 doubles, serialisable</span></div>
+        </div>
+
+        <p>The only concession is fixing both stages to the same row range <code>t ∈ [L+1, n]</code> rather than letting each start where it naturally could. On a series of 300 million rows that discards about 35 rows, and it makes the two stages mutually consistent rather than less so.</p>
+
+        <div class="kv">
+          <div><dt>Passes over data</dt><dd>1<small>Regardless of p, q, m</small></dd></div>
+          <div><dt>Accumulator memory</dt><dd>(L+1)²<small>11.6 KB at L = 37</small></dd></div>
+          <div><dt>Rows supported</dt><dd>Unbounded<small>Nothing materialised</small></dd></div>
+          <div><dt>Array API ceiling</dt><dd>268 435 456<small>2 GB object limit ÷ 8 bytes</small></dd></div>
+        </div>
+
+        <h3><span class="sub">4.2</span>Why autocovariances are accumulated separately</h3>
+        <p><code>G</code> is <strong>not</strong> Toeplitz. <code>G[0,1]</code> and <code>G[1,2]</code> share a lag distance but cover row ranges offset by one, so they differ. Durbin–Levinson requires a genuinely Toeplitz <code>γ̂</code>, and the divide-by-<em>n</em> estimator is positive semi-definite precisely because it is the classical one — which is the standing reason for choosing it.</p>
+        <p>So the pass feeds two accumulators, not one: <code>G</code> for regression, and the classical <code>γ̂<sub>k</sub></code> sums each over their own natural range <code>t ∈ [k+1, n]</code> for ACF and PACF. They share a ring buffer, so the second costs <em>L</em> running sums and nothing else. Merging them would quietly destroy the stability property the biased estimator was chosen to provide.</p>
+
+        <h3><span class="sub">4.3</span>Parallel fitting of one long series</h3>
+        <p>Partial <code>G</code> matrices merge by addition, so a long series can be fitted in parallel over row ranges. Lagged rows straddle partition boundaries, so each partition reads a <strong>warm-up prefix</strong> of exactly <code>L</code> rows before its start, uses them only to prime the ring buffer, and contributes none of them to <code>G</code>. The merged result is then identical to the single-pass result up to floating-point associativity. This is an asserted invariant, not an aspiration — see §11.</p>
+
+        <h3><span class="sub">4.4</span>What is excluded</h3>
+        <p>Hannan–Rissanen's optional third-stage refinement filters <code>y</code> by the estimated ARMA polynomial — an infinite-order filter, not expressible as a finite Gram matrix. It would cost a genuine second pass or a truncation. Given that the reason for choosing HR was to avoid an optimiser, stage three is excluded and the documentation says so plainly.</p>
+      </section>
+
+      <!-- ============ 5 ============ -->
+      <section id="s5">
+        <h2><span class="num">Section 05</span>Forecasting</h2>
+        <p class="lede">The horizon is the caller's input, expressed either in periods or in calendar time. Intervals are not optional.</p>
+
+        <h3><span class="sub">5.1</span>Horizon</h3>
+<pre><code><span class="k">public readonly record struct</span> ForecastHorizon
+{
+    <span class="k">public static</span> ForecastHorizon Periods(<span class="k">int</span> count);
+    <span class="k">public static</span> ForecastHorizon Days(<span class="k">int</span> count);
+    <span class="k">public static</span> ForecastHorizon Months(<span class="k">int</span> count);
+    <span class="k">public static</span> ForecastHorizon Years(<span class="k">double</span> count);
+}</code></pre>
+        <p>Calendar horizons resolve against <code>ArimaOptions.Frequency</code>. Calling <code>Years(2)</code> without a declared frequency throws <code>ForecastHorizonException</code> rather than guessing — a library that silently assumes daily data when the series is monthly is worse than one that refuses.</p>
+
+        <h3><span class="sub">5.2</span>Recursion and integration</h3>
+        <p>Point forecasts are produced by the standard recursion on the differenced scale: future innovations are zero, and residuals within the last <em>q</em> steps come from the fitted tail. The result is then integrated back through <code>(1−B<sup>s</sup>)<sup>D</sup></code> and <code>(1−B)<sup>d</sup></code> using the integration state carried on the fit. For ARIMAX, future exogenous values are a required argument — the library will not extrapolate the consumer's regressors for them.</p>
+
+        <h3><span class="sub">5.3</span>Prediction intervals</h3>
+        <p>Interval half-width at step <em>h</em> is <code>z<sub>α</sub> · σ̂ · sqrt(Σ<sub>j&lt;h</sub> ψ<sub>j</sub>²)</code>, with the <code>ψ</code> weights obtained from the AR and MA polynomials and then cumulated once per order of differencing. <code>ForecastResult</code> always carries <code>Mean</code>, <code>Lower</code>, <code>Upper</code> and <code>StandardError</code>; there is no point-only overload.</p>
+
+        <div class="note">
+          <span class="label">Design note — long horizons</span>
+          <p>An ARIMA point forecast converges to its drift line within a handful of steps. At a two- or three-year horizon the mean path is a straight line and carries almost no information; the interval width is the entire content of the forecast, and for <em>d</em> = 1 it grows roughly like <code>√h</code>. Making intervals mandatory is therefore a correctness decision, not a convenience. The documentation must state this rather than let a consumer read a flat line as a confident prediction.</p>
+        </div>
+      </section>
+
+      <!-- ============ 6 ============ -->
+      <section id="s6">
+        <h2><span class="num">Section 06</span>Order selection</h2>
+        <p class="lede">Because every candidate order is a different small matrix <code>A</code> applied to the same <code>G</code>, an entire grid search costs one pass over the data.</p>
+
+<pre><code><span class="k">public sealed record</span> AutoArimaOptions
+{
+    <span class="k">public int</span>                  MaxP               { <span class="k">get</span>; <span class="k">init</span>; } = 5;
+    <span class="k">public int</span>                  MaxQ               { <span class="k">get</span>; <span class="k">init</span>; } = 5;
+    <span class="k">public</span> IReadOnlyList&lt;<span class="k">int</span>&gt;   DifferenceOrders   { <span class="k">get</span>; <span class="k">init</span>; } = [0, 1, 2];
+    <span class="k">public</span> IReadOnlyList&lt;SeasonalOrder&gt; SeasonalCandidates { <span class="k">get</span>; <span class="k">init</span>; } = [SeasonalOrder.None];
+    <span class="k">public</span> InformationCriterion Criterion          { <span class="k">get</span>; <span class="k">init</span>; } = InformationCriterion.Aicc;
+}
+
+<span class="k">public sealed class</span> AutoArima
+{
+    <span class="k">public</span> ValueTask&lt;ArimaSelection&gt; SelectAsync(ITimeSeriesSource source, CancellationToken ct = <span class="k">default</span>);
+}</code></pre>
+
+        <p>Differencing order changes the series itself, so each <em>d</em> (and each seasonal candidate) needs its own transform and its own <code>G</code> — but those run side by side off a single cursor. With <code>MaxP = MaxQ = 5</code>, <code>m = 32</code> and three values of <em>d</em>, that is three matrices of 38 × 38, about 35 KB in total, to evaluate 108 candidate models on one scan.</p><p><strong>Amendment (M7).</strong> An information criterion cannot choose <em>d</em>: candidates at different differencing orders are fitted to different series, so their likelihoods are not comparable. <em>d</em> is chosen by a KPSS level-stationarity test on each candidate — accumulated in the same pass from three running sums and the autocovariances already kept — taking the smallest <em>d</em> not rejected, or the largest if all are. The criterion then ranks only (<em>p</em>,<em>q</em>) at that fixed <em>d</em>, where every candidate shares the same rows and the comparison is valid. Seasonal differencing is chosen by a documented autocorrelation heuristic pending a seasonal unit-root test.</p>
+        <p>Pilot order <em>m</em> comes free from the same matrix: AR(<em>k</em>) for every <code>k ≤ MaxPilotOrder</code> is a nested submatrix of <code>G</code>, so its residual sum of squares — and therefore its AICc — is available without touching data. Choosing <em>m</em> stops being a guess.</p>
+        <p><code>ArimaSelection</code> returns the winning <code>ArimaFit</code> plus the full ranked table of candidates with their criteria, so the choice is inspectable rather than opaque.</p>
+      </section>
+
+      <!-- ============ 7 ============ -->
+      <section id="s7">
+        <h2><span class="num">Section 07</span>Data access</h2>
+        <p class="lede">The seam between the library and the consumer's database is a batched cursor. Nothing above it knows what a connection is.</p>
+
+        <h3><span class="sub">7.1</span>Interfaces (in core, zero dependency)</h3>
+<pre><code><span class="k">namespace</span> TimeSeries.Data;
+
+<span class="k">public interface</span> ITimeSeriesSource
+{
+    <span class="k">int</span> RegressorCount { <span class="k">get</span>; }
+    ValueTask&lt;ITimeSeriesCursor&gt; OpenAsync(CancellationToken ct = <span class="k">default</span>);
+}
+
+<span class="k">public interface</span> ITimeSeriesCursor : IAsyncDisposable
+{
+    ValueTask&lt;<span class="k">bool</span>&gt; ReadAsync(CancellationToken ct = <span class="k">default</span>);
+    SeriesBatch Current { <span class="k">get</span>; }
+}
+
+<span class="k">public readonly struct</span> SeriesBatch
+{
+    <span class="k">public</span> ReadOnlyMemory&lt;<span class="k">double</span>&gt; Values     { <span class="k">get</span>; }  <span class="c">// Count</span>
+    <span class="k">public</span> ReadOnlyMemory&lt;<span class="k">double</span>&gt; Exogenous  { <span class="k">get</span>; }  <span class="c">// Count × RegressorCount, row-major</span>
+    <span class="k">public int</span> Count { <span class="k">get</span>; }
+}</code></pre>
+
+        <p><strong>Batching is the reason this is not plain <code>IAsyncEnumerable&lt;double&gt;</code>.</strong> A buffered <code>await foreach</code> carries roughly 5–20 ns of state-machine overhead per item. At 300 million rows that is seconds of pure ceremony against a few seconds of actual arithmetic. Eight thousand rows per await amortises it away and leaves the inner loop a synchronous span loop the JIT can vectorise. <code>IAsyncEnumerable&lt;double&gt;</code> remains a public convenience overload, implemented on top of this.</p>
+
+        <h3><span class="sub">7.2</span>Reading at scale</h3>
+        <ul>
+          <li><strong>No <code>OFFSET</code> pagination.</strong> <code>OFFSET n</code> is O(<em>n</em>) per page and turns a full scan into O(<em>n</em>²). Where paging is needed, the source uses keyset seeks: <code>WHERE (key, ts) &gt; (@lastKey, @lastTs) ORDER BY key, ts</code>. Preferably it simply holds one ordered cursor open.</li>
+          <li><strong>Sequential access.</strong> The reader is opened with <code>CommandBehavior.SequentialAccess</code> and columns are read in ordinal order.</li>
+          <li><strong>Buffers are pooled.</strong> Batch buffers come from <code>ArrayPool&lt;double&gt;</code> and are returned on dispose. Steady-state allocation during a fit is zero.</li>
+          <li><strong>Windows are explicit.</strong> Every fit records a closed <code>[from, to)</code> range in <code>FitWindow</code>. Single-pass estimation means this is not needed for consistency, but it gives the incremental watermark and an auditable statement of exactly what was fitted.</li>
+        </ul>
+
+        <h3><span class="sub">7.3</span>Many series in one scan</h3>
+        <p>Set <code>KeyColumn</code> and order by <code>(key, time)</code>. Because keys arrive contiguously, exactly one series is in progress at a time, so working memory is <strong>O(L²) per worker, not per key</strong> — a million series costs the same as one. This requires a composite index on <code>(key, time)</code>; without it the database sorts on disk and the problem moves rather than disappears. The source validates the ordering and throws on an out-of-order key rather than silently fitting a mixture.</p>
+
+        <h3><span class="sub">7.4</span>Gaps <span class="chip chip-open">Decision 6</span></h3>
+        <p>ARIMA assumes regular spacing, and at this volume missing observations are certain — holidays, halts, late-arriving rows. Detection belongs to the source, which sees timestamps; the core sees only values. <code>DbSourceOptions.Gaps</code> takes <code>Throw</code> (default), <code>ForwardFill</code> or <code>Interpolate</code>, evaluated against <code>ExpectedStep</code>. Defaulting to <code>Throw</code> makes a silently misaligned fit impossible.</p>
+      </section>
+
+      <!-- ============ 8 ============ -->
+      <section id="s8">
+        <h2><span class="num">Section 08</span>Incremental refit</h2>
+        <p class="lede">Because <code>G</code>, <code>s</code> and <code>N</code> are pure sums, folding new observations into a saved state gives a result identical to refitting from scratch over the union.</p>
+
+<pre><code><span class="k">public sealed class</span> IncrementalArima
+{
+    <span class="k">public</span> IncrementalArima(ArimaOptions options);
+    <span class="k">public static</span> IncrementalArima Restore(Stream state, ArimaOptions options);
+
+    <span class="k">public</span> ValueTask FoldAsync(ITimeSeriesSource newRows, CancellationToken ct = <span class="k">default</span>);
+    <span class="k">public</span> ArimaFit Solve();
+    <span class="k">public void</span> SaveTo(Stream destination);
+
+    <span class="k">public</span> FitWindow Watermark { <span class="k">get</span>; }
+}</code></pre>
+
+        <p>Both the pilot coefficients and the ARMA coefficients are re-derived from the updated <code>G</code> with no data access, so there is no frozen pilot, no accumulated drift, and no refit cadence to tune. Batch and incremental are the same computation reached by different routes, and §11 asserts them equal.</p>
+        <p><code>ForgettingFactor</code> remains available as a modelling choice: scaling <code>G</code>, <code>s</code> and <code>N</code> by <code>λ</code> before each fold ages older observations out at a chosen half-life. Useful where regimes shift; it is no longer compensating for anything.</p>
+        <p>Serialised state is <code>(L+1)² + (L+1) + 2</code> doubles plus the ring-buffer tail and the window — about 12 KB at <code>L = 37</code>, small enough to live in a row of the consumer's own database.</p>
+      </section>
+
+      <!-- ============ 9 ============ -->
+      <section id="s9">
+        <h2><span class="num">Section 09</span>Numerical contract</h2>
+        <p class="lede">Accumulating cross-products squares the condition number. At financial scales that is a real hazard, and every mitigation here is cheap on a path that is I/O-bound.</p>
+
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Hazard</th><th>Where it bites</th><th>Mitigation</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Catastrophic cancellation</td>
+                <td>A price level near 40 000 with a daily deviation near 200; <code>Σx²/n − x̄²</code> loses most of its significant digits.</td>
+                <td>Subtract a per-column offset captured at the first observation before accumulating. Algebraically exact, restores conditioning.</td>
+              </tr>
+              <tr>
+                <td>Squared condition number</td>
+                <td>ARIMAX with regressors on different scales — a price level beside a 0/1 flag.</td>
+                <td>Standardise columns using the first-pass moments; un-scale coefficients at solve time. Optional ridge remains available.</td>
+              </tr>
+              <tr>
+                <td>Drift over 10⁸ additions</td>
+                <td>Long-running accumulation of <code>G</code>.</td>
+                <td>Neumaier compensation, opt-in. Roughly 2× the flops on a path that is not compute-bound.</td>
+              </tr>
+              <tr>
+                <td>Singular design</td>
+                <td>A constant differenced series — what any exact polynomial trend reduces to.</td>
+                <td>Detected and short-circuited to a deterministic fit, per the standing decision.</td>
+              </tr>
+              <tr>
+                <td>Non-invertible MA roots</td>
+                <td>Hannan–Rissanen on short or noisy series can land outside the invertible region.</td>
+                <td>Roots are checked; the fit carries <code>Diagnostics.IsInvertible</code> and forecasting a non-invertible model raises a warning rather than returning quietly wrong intervals.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>If normal equations plus column scaling prove insufficient in practice, the accumulator interface also admits a streaming QR by Givens rotations — still O(L²) state, still row-by-row, still mergeable by stacking two <code>R</code> factors and re-triangularising. It drops in behind the same seam without touching callers. Documented as an upgrade path, not built speculatively.</p>
+      </section>
+
+      <!-- ============ 10 ============ -->
+      <section id="s10">
+        <h2><span class="num">Section 10</span>Errors and validation</h2>
+        <p class="lede">A forecasting library that is quietly wrong is worse than one that refuses. Every failure mode below throws rather than degrading.</p>
+
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Condition</th><th>Exception</th></tr></thead>
+            <tbody>
+              <tr><td>Fewer than <code>L + 10(p+q+1)</code> usable observations</td><td><code>InsufficientDataException</code></td></tr>
+              <tr><td>Negative order, seasonal period &lt; 2, λ outside (0,1]</td><td><code>ArgumentOutOfRangeException</code></td></tr>
+              <tr><td>NaN or infinity in the series or a regressor</td><td><code>InvalidSeriesException</code> naming the row index</td></tr>
+              <tr><td>Gap detected under <code>GapPolicy.Throw</code></td><td><code>SeriesGapException</code> naming the timestamps either side</td></tr>
+              <tr><td>Out-of-order key in a grouped scan</td><td><code>SeriesOrderException</code></td></tr>
+              <tr><td>Calendar horizon without a declared frequency</td><td><code>ForecastHorizonException</code></td></tr>
+              <tr><td>ARIMAX forecast missing future regressors, or wrong length</td><td><code>ArgumentException</code> stating rows expected and supplied</td></tr>
+              <tr><td>Design matrix singular beyond the constant-series short circuit</td><td><code>SingularDesignException</code> suggesting ridge</td></tr>
+              <tr><td>MAPE with a zero actual</td><td><code>ArgumentException</code> — per the standing decision, never a silently dropped point</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>All exception messages name the offending value and index. <code>CancellationToken</code> is honoured at batch boundaries throughout the streaming path, so a cancelled fit stops within one batch rather than at the end of the scan.</p>
+      </section>
+
+      <!-- ============ 11 ============ -->
+      <section id="s11">
+        <h2><span class="num">Section 11</span>Testing and acceptance</h2>
+        <p class="lede">There is no existing implementation to check against, so correctness has to be established from outside the library. Four independent layers, cheapest first.</p>
+
+        <ol class="body-list">
+          <li><strong>Closed-form identities.</strong> AR(1) has <code>ρ<sub>k</sub> = φ<sup>k</sup></code>; MA(1) has <code>ρ<sub>1</sub> = θ/(1+θ²)</code> and zero beyond; PACF of AR(<em>p</em>) cuts off after lag <em>p</em>. These need no reference implementation.</li>
+          <li><strong>Hand-computed fixtures.</strong> Five- to ten-point series with arithmetic worked out in the test file, covering differencing, integration, OLS and the metrics.</li>
+          <li><strong>Parameter recovery.</strong> Simulate from known <code>(φ, θ, β)</code>, confirm estimates fall within two standard errors at <em>n</em> = 10⁴ and that the error shrinks as <em>n</em> grows. This tests the property Hannan–Rissanen actually promises.</li>
+          <li><strong>Reference values.</strong> Constants generated from <code>statsmodels</code>, committed together with the script that produced them so they can be regenerated and audited.</li>
+        </ol>
+
+        <h3><span class="sub">11.1</span>Structural invariants</h3>
+        <p>These catch the streaming-specific bugs the layers above cannot:</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Invariant</th><th>Tolerance</th></tr></thead>
+            <tbody>
+              <tr><td>Streaming fit ≡ in-memory fit</td><td>1e−10 relative</td></tr>
+              <tr><td>Partitioned fit with warm-up ≡ single-pass fit</td><td>1e−12 relative</td></tr>
+              <tr><td>Incremental fold ≡ batch over the union</td><td>Exact equality of <code>G</code>, <code>s</code>, <code>N</code></td></tr>
+              <tr><td>Difference → integrate round trip</td><td>1e−12 absolute, property-tested over random series</td></tr>
+              <tr><td>Grid search reads the source exactly once</td><td>Asserted via a counting source</td></tr>
+              <tr><td>10⁸-row synthetic fit under a fixed memory ceiling</td><td>&lt; 64 MB working set</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The counting-source assertion matters more than it looks: the one-pass property is the architectural claim of this design, and a refactor that quietly reintroduces a second scan would otherwise pass every other test.</p>
+      </section>
+
+      <!-- ============ 12 ============ -->
+      <section id="s12">
+        <h2><span class="num">Section 12</span>Packaging</h2>
+
+        <h3><span class="sub">12.1</span>Build requirements</h3>
+        <ul>
+          <li>Deterministic builds, <code>ContinuousIntegrationBuild</code> set in CI, SourceLink, and symbol packages (<code>.snupkg</code>) published alongside.</li>
+          <li><code>GenerateDocumentationFile</code> on, warnings as errors, XML documentation on every public member — the library ships as a NuGet package and IntelliSense is its primary documentation surface.</li>
+          <li>Public API surface tracked by <code>Microsoft.CodeAnalysis.PublicApiAnalyzers</code> so a breaking change cannot pass review unnoticed.</li>
+          <li><code>PackageLicenseFile</code> pointing at the custom licence, with the commercial path stated in the package description — consumers will see a non-OSI licence and need to know what to do about it.</li>
+        </ul>
+
+        <h3><span class="sub">12.2</span>Target frameworks <span class="chip chip-open">Decision 1</span></h3>
+        <p><code>net8.0</code> is the primary target. The question is whether to multi-target for .NET Framework, which is still widespread in finance:</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Target</th><th>Reaches</th><th>Cost</th></tr></thead>
+            <tbody>
+              <tr><td><code>net8.0</code></td><td>.NET 8 and later</td><td>None</td></tr>
+              <tr><td><code>netstandard2.1</code></td><td>.NET Core 3.0+, Mono, Xamarin — <em>not</em> .NET Framework</td><td>None; adds little reach over net8.0</td></tr>
+              <tr><td><code>netstandard2.0</code></td><td>.NET Framework 4.6.1+</td><td><code>System.Memory</code> and <code>Microsoft.Bcl.AsyncInterfaces</code> — ends the zero-dependency claim</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Recommendation: ship <code>net8.0</code> only for v1. Both extra dependencies are Microsoft-owned and unobjectionable in practice, but "no external dependencies" is on the front of the README and is worth more than .NET Framework reach until a consumer actually asks for it.</p>
+      </section>
+
+      <!-- ============ 13 ============ -->
+      <section id="s13">
+        <h2><span class="num">Section 13</span>Milestones</h2>
+        <p class="lede">Each milestone lands something verifiable. Nothing depends on a later milestone to be testable.</p>
+
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>#</th><th>Delivers</th><th>Accepted when</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="num-cell"><strong>M1</strong></td>
+                <td>Namespace rename; remove <code>Class1</code>, <code>UnitTest1</code>, committed <code>.DS_Store</code>. Unify differencing under <code>DifferenceSpec(d, D, period)</code> with a streaming transform and an <code>IntegrationState</code> that replaces passing the whole original array.</td>
+                <td>All 19 existing tests ported and green; round-trip property test passes over random series.</td>
+              </tr>
+              <tr>
+                <td class="num-cell"><strong>M2</strong></td>
+                <td>Accumulator layer: lag-augmented Gram, classical autocovariance, Welford moments. <code>Add</code> / <code>Merge</code> / <code>Freeze</code>.</td>
+                <td>γ̂ matches <code>ρ<sub>k</sub> = φ<sup>k</sup></code> on simulated AR(1); partitioned merge equals single pass exactly.</td>
+              </tr>
+              <tr>
+                <td class="num-cell"><strong>M3</strong></td>
+                <td>Solver and diagnostics: normal equations with partial pivoting, column scaling, optional ridge; Durbin–Levinson PACF; white-noise bounds; error metrics.</td>
+                <td>Hand-computed OLS fixtures pass; PACF of AR(<em>p</em>) cuts off after lag <em>p</em>; MAPE throws on a zero actual.</td>
+              </tr>
+              <tr>
+                <td class="num-cell"><strong>M4</strong></td>
+                <td>ARIMA and ARIMAX fitting from <code>G</code>: pilot order by AICc, intercept, exogenous regressors, invertibility check.</td>
+                <td>Parameter recovery within two standard errors at <em>n</em> = 10⁴; known β recovered for ARIMAX.</td>
+              </tr>
+              <tr>
+                <td class="num-cell"><strong>M5</strong></td>
+                <td>Forecasting: ψ-weights, integration, prediction intervals, <code>ForecastHorizon</code> with calendar resolution.</td>
+                <td>ARIMA(0,1,0) intervals equal <code>σ√h</code>; forecasts match committed <code>statsmodels</code> reference constants.</td>
+              </tr>
+              <tr>
+                <td class="num-cell"><strong>M6</strong></td>
+                <td>Streaming: batched cursor, <code>DbTimeSeriesSource</code>, grouped multi-series scan, incremental fold and state serialisation.</td>
+                <td>Streaming fit ≡ in-memory fit; fold ≡ batch exactly; 10⁸-row synthetic run stays under the memory ceiling.</td>
+              </tr>
+              <tr>
+                <td class="num-cell"><strong>M7</strong></td>
+                <td><code>AutoArima</code> grid search, MongoDB source, DI extensions, NuGet packaging.</td>
+                <td>Counting source proves exactly one read pass for the full grid; packages install into a fresh console app and run the README sample unmodified.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ 14 ============ -->
+      <section id="s14">
+        <h2><span class="num">Section 14</span>Open decisions</h2>
+        <p class="lede">Each carries a recommendation. Work proceeds on the recommendation unless overridden.</p>
+
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>#</th><th>Question</th><th>Recommendation</th><th>State</th></tr></thead>
+            <tbody>
+              <tr><td class="num-cell">1</td><td>Multi-target <code>netstandard2.0</code> for .NET Framework?</td><td>No. Keep zero dependencies for v1; revisit on request.</td><td><span class="chip chip-open">Open</span></td></tr>
+              <tr><td class="num-cell">2</td><td>Rename <code>TimeSeries.Core.Math</code>, which shadows <code>System.Math</code>?</td><td>Yes, in M1. Cheap now, breaking after release.</td><td><span class="chip chip-open">Open</span></td></tr>
+              <tr><td class="num-cell">3</td><td>Seasonal AR/MA terms (<em>P</em>, <em>Q</em>) in v1?</td><td>Seasonal differencing yes; seasonal polynomial terms in v1.1.</td><td><span class="chip chip-defer">Deferred</span></td></tr>
+              <tr><td class="num-cell">4</td><td>What is <code>isCumulative</code> on <code>Difference</code> for? Cumulating lag-1 differences just reconstructs <code>y<sub>t</sub> − y<sub>0</sub></code>.</td><td>Drop it unless there is a caller. Needs your answer.</td><td><span class="chip chip-open">Open</span></td></tr>
+              <tr><td class="num-cell">5</td><td>Non-commercial licence on a public NuGet package.</td><td>Ship it, but state the commercial path in the package description. Adoption will be limited; that is your call, not a technical one.</td><td><span class="chip chip-open">Open</span></td></tr>
+              <tr><td class="num-cell">6</td><td>Default gap policy.</td><td><code>Throw</code>. A silently misaligned fit is the worst outcome.</td><td><span class="chip chip-open">Open</span></td></tr>
+              <tr><td class="num-cell">7</td><td>Hannan–Rissanen stage-three refinement.</td><td>Exclude. Costs a real second pass and contradicts the reason HR was chosen.</td><td><span class="chip chip-settled">Settled</span></td></tr>
+              <tr><td class="num-cell">8</td><td>Composite index on <code>(key, time)</code> for grouped scans.</td><td>Required, not optional. Document it and validate ordering at runtime.</td><td><span class="chip chip-settled">Settled</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3><span class="sub">14.1</span>Standing decisions carried forward</h3>
+        <p>Recorded here so they are not relitigated: one <code>ArimaModel</code> covers ARIMA and ARIMAX; Hannan–Rissanen rather than exact MLE; biased divide-by-<em>n</em> autocovariance to keep the sequence positive semi-definite and Durbin–Levinson stable; MAPE throws on a zero actual; a constant differenced series is detected and short-circuited.</p>
+      </section>
+
+      <footer class="colophon">
+        <span>TimeSeries.NET · Library specification · Draft 1</span>
+        <span>2026-09-15</span>
+        <span>Supersedes the ArimaxModel sketch in README.md</span>
+      </footer>
+
+    </main>
+  </div>
+</div>

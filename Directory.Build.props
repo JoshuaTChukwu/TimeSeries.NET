@@ -1,0 +1,25 @@
+<Project>
+
+  <!--
+    Shared settings for every project in the repository. Per architecture §9, projects
+    do not set these individually: a new project cannot be added with different
+    language, nullability or warning settings by accident.
+  -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Product>TimeSeries.NET</Product>
+    <Authors>Joshua Chukwu</Authors>
+    <RepositoryUrl>https://github.com/joshuatchukwu/TimeSeries.NET</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+</Project>
