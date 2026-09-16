@@ -20,5 +20,8 @@
     <PackageReference Include="System.Memory" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="TimeSeries.NET.Tests" />
+  </ItemGroup>
 
 </Project>
