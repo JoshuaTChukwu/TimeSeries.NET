@@ -10,16 +10,19 @@ namespace TimeSeries.Tests.Estimation;
 /// </summary>
 public class OnePassIdentityTests
 {
-    private sealed record NaiveHr(double Intercept, double[] Phi, double[] Theta, double[] Beta, double Sigma2);
+    private sealed record NaiveHr(double Intercept, double[] Phi, double[] Theta, double[] Beta, double Sigma2, double[] ResidualAcf);
 
     /// <summary>
     /// Textbook Hannan-Rissanen, written from the definition against explicit design
     /// matrices, sharing nothing with the library but the linear solver.
     /// </summary>
-    private static NaiveHr Naive(double[] z, double[]? x, int p, int q, int m)
+    private static NaiveHr Naive(double[] z, double[]? x, int p, int q, int m, int ljungBoxLags = 10)
     {
         var n = z.Length;
-        var lagDepth = Math.Max(p, q + m);
+
+        // The library carries the Gram K lags deeper for the Ljung-Box test, so both
+        // stages start K rows later than estimation alone would need.
+        var lagDepth = Math.Max(p, q + m) + ljungBoxLags;
         var r = x is null ? 0 : 1;
 
         // Stage one over t >= L: z_t ~ 1 + z_(t-1..t-m) + x_t
@@ -79,7 +82,9 @@ public class OnePassIdentityTests
 
         var rss = 0d;
         var row = new double[columns];
-        for (var t = lagDepth; t < n; t++)
+        var stageTwoResidual = new double[n];
+        var firstResidual = Math.Max(p, q + m);
+        for (var t = firstResidual; t < n; t++)
         {
             row[0] = 1d;
             for (var k = 1; k <= p; k++)
@@ -103,7 +108,26 @@ public class OnePassIdentityTests
                 fitted += coefficients[c] * row[c];
             }
 
-            rss += (z[t] - fitted) * (z[t] - fitted);
+            stageTwoResidual[t] = z[t] - fitted;
+
+            if (t >= lagDepth)
+            {
+                rss += stageTwoResidual[t] * stageTwoResidual[t];
+            }
+        }
+
+        // Residual autocorrelations over the same rows the library uses, from the
+        // explicit residual series.
+        var acf = new double[ljungBoxLags];
+        for (var k = 1; k <= ljungBoxLags; k++)
+        {
+            var cross = 0d;
+            for (var t = lagDepth; t < n; t++)
+            {
+                cross += stageTwoResidual[t] * stageTwoResidual[t - k];
+            }
+
+            acf[k - 1] = cross / rss;
         }
 
         return new NaiveHr(
@@ -111,7 +135,8 @@ public class OnePassIdentityTests
             coefficients.Skip(1).Take(p).ToArray(),
             coefficients.Skip(1 + p).Take(q).ToArray(),
             coefficients.Skip(1 + p + q).Take(r).ToArray(),
-            rss / (n - lagDepth));
+            rss / (n - lagDepth),
+            acf);
     }
 
     private static double[] Ols(int n, int firstRow, int columns, Action<int, double[]> fill, Func<int, double> target)
@@ -158,6 +183,11 @@ public class OnePassIdentityTests
         AssertClose(naive.Phi, fit.AutoRegressive.Span, 1e-8);
         AssertClose(naive.Theta, fit.MovingAverage.Span, 1e-8);
         Assert.Equal(naive.Sigma2, fit.InnovationVariance, 1e-8);
+
+        // The Ljung-Box residual autocorrelations come from the Gram, never from a
+        // residual series; they must equal the ones computed from the explicit residuals.
+        AssertClose(naive.ResidualAcf, fit.Diagnostics.ResidualAutocorrelations.Span, 1e-8);
+        Assert.Equal(10, fit.Diagnostics.LjungBoxLags);
     }
 
     [Fact]
@@ -181,6 +211,7 @@ public class OnePassIdentityTests
         AssertClose(naive.Theta, fit.MovingAverage.Span, 1e-8);
         AssertClose(naive.Beta, fit.ExogenousCoefficients.Span, 1e-8);
         Assert.Equal(naive.Sigma2, fit.InnovationVariance, 1e-8);
+        AssertClose(naive.ResidualAcf, fit.Diagnostics.ResidualAutocorrelations.Span, 1e-8);
     }
 
     [Fact]

@@ -30,8 +30,10 @@ internal static class HannanRissanen
         internal Result(
             double intercept, double[] phi, double[] theta, double[] beta,
             int pilotOrder, double pilotIntercept, double[] pilotPhi, double[] pilotBeta,
-            double residualSumOfSquares, double[] standardErrors, SolveDiagnostics solve)
+            double residualSumOfSquares, double[] standardErrors, SolveDiagnostics solve,
+            double[] residualAutocovariances)
         {
+            ResidualAutocovariances = residualAutocovariances;
             Intercept = intercept;
             Phi = phi;
             Theta = theta;
@@ -67,6 +69,12 @@ internal static class HannanRissanen
         internal double[] StandardErrors { get; }
 
         internal SolveDiagnostics Solve { get; }
+
+        /// <summary>
+        /// <c>sum_t e_t e_(t-k)</c> for <c>k = 0 .. K</c> over the second-stage residuals,
+        /// computed exactly from the Gram matrix; index 0 equals the residual sum of squares.
+        /// </summary>
+        internal double[] ResidualAutocovariances { get; }
 
         internal int ParameterCount => StandardErrors.Length;
     }
@@ -252,6 +260,7 @@ internal static class HannanRissanen
 
         var residualSumOfSquares = Math.Max(g[0] - Dot(coefficients, rhs2), 0d);
         var standardErrors = StandardErrors(normal, count, residualSumOfSquares / n, solver);
+        var residualAutocovariances = ResidualAutocovariances(g, side, design, coefficients, layout, options.LjungBoxLags);
 
         position = 0;
         var c0 = intercept ? coefficients[position++] : 0d;
@@ -261,7 +270,87 @@ internal static class HannanRissanen
 
         return new Result(
             c0, phi, theta, beta, pilotOrder, pilotIntercept, pilotPhi, pilotBeta,
-            residualSumOfSquares, standardErrors, diagnostics);
+            residualSumOfSquares, standardErrors, diagnostics, residualAutocovariances);
+    }
+
+    /// <summary>
+    /// The residual is itself a functional of the augmented row, <c>e_t = w' v~_t</c> with
+    /// <c>w = e_0 - A beta</c>. Its lag-<c>k</c> autocovariance is therefore
+    /// <c>w' G_k w</c>, where <c>G_k[i, j] = sum_t v~_(t,i) v~_(t-k,j)</c> is the Gram read
+    /// with every column shifted <c>k</c> lags deeper — which is why the matrix is carried
+    /// <c>K</c> lags beyond what estimation alone needs.
+    /// </summary>
+    private static double[] ResidualAutocovariances(
+        double[] g, int side, double[][] design, double[] coefficients, GramLayout layout, int lags)
+    {
+        var w = new double[side];
+        w[0] = 1d;
+
+        for (var c = 0; c < design.Length; c++)
+        {
+            var functional = design[c];
+            var beta = coefficients[c];
+
+            for (var a = 0; a < side; a++)
+            {
+                if (functional[a] != 0d)
+                {
+                    w[a] -= beta * functional[a];
+                }
+            }
+        }
+
+        var support = new List<int>();
+        for (var a = 0; a < side; a++)
+        {
+            if (w[a] != 0d)
+            {
+                support.Add(a);
+            }
+        }
+
+        var autocovariances = new double[lags + 1];
+
+        for (var k = 0; k <= lags; k++)
+        {
+            var sum = 0d;
+
+            foreach (var i in support)
+            {
+                var row = i * side;
+                var partial = 0d;
+
+                foreach (var j in support)
+                {
+                    partial += w[j] * g[row + Shift(j, k, layout)];
+                }
+
+                sum += w[i] * partial;
+            }
+
+            autocovariances[k] = sum;
+        }
+
+        return autocovariances;
+    }
+
+    /// <summary>The index of the same quantity <paramref name="k"/> observations earlier.</summary>
+    private static int Shift(int index, int k, GramLayout layout)
+    {
+        if (index == layout.Constant)
+        {
+            return index;
+        }
+
+        if (index <= layout.LagDepth)
+        {
+            return index + k;
+        }
+
+        var offset = index - layout.LagDepth - 1;
+        var lag = offset / layout.RegressorCount;
+        var regressor = offset % layout.RegressorCount;
+        return layout.Exogenous(lag + k, regressor);
     }
 
     /// <summary>

@@ -58,6 +58,15 @@ public sealed record ArimaOptions
     public SeriesFrequency? Frequency { get; init; }
 
     /// <summary>
+    /// The number of residual autocorrelations <c>K</c> the Ljung-Box test examines.
+    /// Default 10; zero disables the test. Computed exactly in the same pass by carrying
+    /// the Gram matrix <c>K</c> lags deeper, which costs <c>K</c> extra lag columns and
+    /// the first <c>K</c> rows of the differenced series — both stages and the test then
+    /// share one row range.
+    /// </summary>
+    public int LjungBoxLags { get; init; } = 10;
+
+    /// <summary>
     /// Checks the options for consistency.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
@@ -92,6 +101,11 @@ public sealed record ArimaOptions
         if (!(Ridge >= 0d))
         {
             throw new ArgumentOutOfRangeException(nameof(Ridge), Ridge, "Ridge must be zero or greater.");
+        }
+
+        if (LjungBoxLags < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(LjungBoxLags), LjungBoxLags, "Ljung-Box lags must be zero or greater.");
         }
 
         if (Order.Q == 0)
@@ -144,6 +158,12 @@ public sealed record ArimaOptions
         }
     }
 
-    /// <summary>The lag depth <c>L = max(p, q + m_max)</c> the Gram matrix must span.</summary>
+    /// <summary>The lag depth <c>L = max(p, q + m_max)</c> estimation needs.</summary>
     internal int LagDepth => Order.Q == 0 ? Order.P : Math.Max(Order.P, Order.Q + PilotRange.Maximum);
+
+    /// <summary>The lag depth the Gram matrix actually spans: <c>L</c> plus the Ljung-Box lags.</summary>
+    internal int GramDepth => LagDepth + LjungBoxLags;
+
+    /// <summary>The deepest exogenous lag kept in the row: <c>q</c> plus the Ljung-Box lags.</summary>
+    internal int ExogenousLagDepth => Order.Q + LjungBoxLags;
 }

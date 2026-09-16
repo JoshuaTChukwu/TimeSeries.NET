@@ -70,6 +70,9 @@ public sealed record AutoArimaOptions
     /// <summary>The series' frequency, carried into the chosen model for calendar horizons.</summary>
     public SeriesFrequency? Frequency { get; init; }
 
+    /// <summary>Residual autocorrelations examined by the Ljung-Box test on every candidate. Default 10; zero disables.</summary>
+    public int LjungBoxLags { get; init; } = 10;
+
     /// <summary>Checks the options.</summary>
     /// <exception cref="ArgumentOutOfRangeException">A bound is negative, a list is empty, or the significance level is unsupported.</exception>
     public void Validate()
@@ -108,6 +111,7 @@ public sealed record AutoArimaOptions
         MaxPilotOrder = MaxPilotOrder,
         Ridge = Ridge,
         Frequency = Frequency,
+        LjungBoxLags = LjungBoxLags,
     };
 
     /// <summary>One candidate model.</summary>
@@ -119,5 +123,6 @@ public sealed record AutoArimaOptions
         MaxPilotOrder = MaxPilotOrder,
         Ridge = Ridge,
         Frequency = Frequency,
+        LjungBoxLags = LjungBoxLags,
     };
 }

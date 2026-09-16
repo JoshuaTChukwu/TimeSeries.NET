@@ -283,7 +283,8 @@ public class ForecastTests
         var diagnostics = new ArimaDiagnostics(
             100, phi.Length + theta.Length + 2, 100, -100, 200, 201, 210, 4,
             isStationary: true, stationarityMargin: 1, isInvertible: invertible, invertibilityMargin: invertible ? 0.5 : -0.5,
-            isConstantSeries: false, new SolveDiagnostics { Succeeded = true, FailedColumn = -1 });
+            isConstantSeries: false, new SolveDiagnostics { Succeeded = true, FailedColumn = -1 },
+            0, double.NaN, 0, double.NaN, []);
         var seed = new ForecastSeed(
             IntegrationState.FromEnd([1d, 2d, 3d], DifferenceSpec.None),
             [],

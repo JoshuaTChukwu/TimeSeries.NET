@@ -125,9 +125,9 @@ public class IncrementalArimaTests
         incremental.Fold(series.AsSpan(2_000));
         var second = incremental.Solve().Diagnostics.EffectiveObservations;
 
-        // AR(1): every row after the first completes a lag row, so fold one contributes
-        // 1999 rows, halved before fold two adds its 2000.
-        Assert.Equal(1_999, first);
+        // AR(1) with the default ten Ljung-Box lags: rows complete once eleven values are
+        // in, so fold one contributes 1989 rows, halved before fold two adds its 2000.
+        Assert.Equal(1_989, first);
         Assert.Equal((0.5 * first) + 2_000, second);
     }
 
@@ -213,6 +213,9 @@ public class ArimaFitSerializationTests
         Assert.Equal(original.Diagnostics.PilotOrder, restored.Diagnostics.PilotOrder);
         Assert.Equal(original.Diagnostics.IsInvertible, restored.Diagnostics.IsInvertible);
         Assert.Equal(original.Diagnostics.Solve, restored.Diagnostics.Solve);
+        Assert.Equal(original.Diagnostics.LjungBoxStatistic, restored.Diagnostics.LjungBoxStatistic);
+        Assert.Equal(original.Diagnostics.LjungBoxPValue, restored.Diagnostics.LjungBoxPValue);
+        Assert.Equal(original.Diagnostics.ResidualAutocorrelations.ToArray(), restored.Diagnostics.ResidualAutocorrelations.ToArray());
 
         var future = ExogenousMatrix.FromColumns(SeriesGenerator.Ar1(8, 0.4, seed: 4), SeriesGenerator.Gaussian(8, seed: 5));
         var a = original.Forecast(ForecastHorizon.Years(2), future);

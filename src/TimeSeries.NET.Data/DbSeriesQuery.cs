@@ -37,7 +37,7 @@ public sealed record DbSeriesQuery
 
     /// <summary>
     /// The column identifying which series a row belongs to. Setting it makes the source
-    /// a population for <see cref="ArimaModel.FitManyAsync"/>; the result set must then be
+    /// a population for <see cref="ArimaModel.FitManyAsync(IGroupedTimeSeriesSource, CancellationToken)"/>; the result set must then be
     /// ordered by this column first.
     /// </summary>
     public string? KeyColumn { get; init; }

@@ -24,14 +24,15 @@ public class ArimaModelTests
     [Fact]
     public void TooShortASeries_ThrowsWithTheNumbers()
     {
-        // Default MaxPilotOrder 32 with q = 1 gives L = 33; 30 observations cannot fit it.
+        // Default MaxPilotOrder 32 with q = 1 gives L = 33, plus 10 Ljung-Box lags = 43;
+        // 30 observations cannot fit it.
         var model = new ArimaModel(new ArimaOptions { Order = new(1, 0, 1) });
         var series = SeriesGenerator.Uniform(30, seed: 1);
 
         var exception = Assert.Throws<InsufficientDataException>(() => model.Fit(series));
 
         Assert.Equal(30, exception.Available);
-        Assert.Equal(33 + (10 * 3), exception.Required);
+        Assert.Equal(43 + (10 * 3), exception.Required);
         Assert.Contains("MaxPilotOrder", exception.Message, StringComparison.Ordinal);
     }
 
@@ -127,9 +128,13 @@ public class ArimaModelTests
         var fit = new ArimaModel(new ArimaOptions { Order = new(1, 0, 1), PilotOrder = 6 }).Fit(series);
         var d = fit.Diagnostics;
 
-        // Effective rows: differenced count less the lag depth max(p, q + m) = 7.
-        Assert.Equal(2_000 - 7, d.EffectiveObservations);
+        // Effective rows: differenced count less the Gram depth max(p, q + m) + K = 7 + 10.
+        Assert.Equal(2_000 - 17, d.EffectiveObservations);
         Assert.Equal(4, d.ParameterCount); // intercept, phi, theta, variance
+        Assert.Equal(10, d.LjungBoxLags);
+        Assert.Equal(8, d.LjungBoxDegreesOfFreedom);
+        Assert.InRange(d.LjungBoxPValue, 0d, 1d);
+        Assert.Equal(10, d.ResidualAutocorrelations.Length);
         Assert.True(d.Aic < d.Aicc);
         Assert.True(d.Aicc < d.Bic);
         Assert.True(double.IsFinite(d.LogLikelihood));

@@ -141,12 +141,12 @@ public class AutoArimaTests
     [Fact]
     public void TooShortForEveryCandidate_ThrowsTheLeastDemandingRequirement()
     {
-        // Lag depth max(3, 2 + 12) = 14, plus ten for the smallest model (0,d,0): 24 rows
-        // would fit that one, so twenty must fail every candidate.
+        // Gram depth max(3, 2 + 12) + 10 Ljung-Box lags = 24, plus ten for the smallest
+        // model (0,d,0): 34 rows would fit that one, so twenty must fail every candidate.
         var exception = Assert.Throws<InsufficientDataException>(
             () => new AutoArima(Small).Select(SeriesGenerator.Uniform(20, seed: 9)));
 
-        Assert.Equal(14 + 10, exception.Required);
+        Assert.Equal(24 + 10, exception.Required);
     }
 
     [Fact]

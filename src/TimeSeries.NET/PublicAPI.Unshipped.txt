@@ -490,3 +490,27 @@ TimeSeries.Transforms.ISeriesTransform
 TimeSeries.Transforms.ISeriesTransform.Reset() -> void
 TimeSeries.Transforms.ISeriesTransform.Transform(System.ReadOnlySpan<double> input, System.Span<double> output) -> int
 TimeSeries.Transforms.ISeriesTransform.WarmupLength.get -> int
+static TimeSeries.FitManyOptions.Default.get -> TimeSeries.FitManyOptions!
+static TimeSeries.FitManyOptions.Sequential.get -> TimeSeries.FitManyOptions!
+static TimeSeries.Statistics.ChiSquaredDistribution.Cdf(double x, double degreesOfFreedom) -> double
+static TimeSeries.Statistics.ChiSquaredDistribution.SurvivalFunction(double x, double degreesOfFreedom) -> double
+TimeSeries.ArimaDiagnostics.LjungBoxDegreesOfFreedom.get -> int
+TimeSeries.ArimaDiagnostics.LjungBoxLags.get -> int
+TimeSeries.ArimaDiagnostics.LjungBoxPValue.get -> double
+TimeSeries.ArimaDiagnostics.LjungBoxStatistic.get -> double
+TimeSeries.ArimaDiagnostics.RejectsWhiteNoiseResiduals(double significance = 0.05) -> bool
+TimeSeries.ArimaDiagnostics.ResidualAutocorrelations.get -> System.ReadOnlyMemory<double>
+TimeSeries.ArimaModel.FitManyAsync(TimeSeries.Data.IGroupedTimeSeriesSource! source, TimeSeries.FitManyOptions! options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<TimeSeries.Data.KeyedArimaFit!>!
+TimeSeries.ArimaOptions.LjungBoxLags.get -> int
+TimeSeries.ArimaOptions.LjungBoxLags.init -> void
+TimeSeries.AutoArimaOptions.LjungBoxLags.get -> int
+TimeSeries.AutoArimaOptions.LjungBoxLags.init -> void
+TimeSeries.FitManyOptions
+TimeSeries.FitManyOptions.BatchesInFlightPerKey.get -> int
+TimeSeries.FitManyOptions.BatchesInFlightPerKey.init -> void
+TimeSeries.FitManyOptions.DegreeOfParallelism.get -> int
+TimeSeries.FitManyOptions.DegreeOfParallelism.init -> void
+TimeSeries.FitManyOptions.KeysInFlight.get -> int
+TimeSeries.FitManyOptions.KeysInFlight.init -> void
+TimeSeries.FitManyOptions.Validate() -> void
+TimeSeries.Statistics.ChiSquaredDistribution

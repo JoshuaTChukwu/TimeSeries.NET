@@ -65,7 +65,7 @@ internal sealed class ArimaScan
         _p = options.Order.P;
         _q = options.Order.Q;
         _r = regressorCount;
-        _layout = new GramLayout(options.LagDepth, regressorCount, _q);
+        _layout = new GramLayout(options.GramDepth, regressorCount, options.ExogenousLagDepth);
 
         var spec = options.Differencing;
         _yTransform = new DifferenceTransform(spec);
@@ -75,14 +75,14 @@ internal sealed class ArimaScan
         for (var i = 0; i < regressorCount; i++)
         {
             _xTransforms[i] = new DifferenceTransform(spec);
-            _xWindows[i] = new LagWindow(_q);
+            _xWindows[i] = new LagWindow(_layout.ExogenousLags);
         }
 
         _yWindow = new LagWindow(_layout.LagDepth);
         _gram = new LagGramAccumulator(_layout.Dimension - 1);
         _moments = new MomentsAccumulator();
         _row = new double[_layout.Dimension];
-        _lagScratch = new double[_q + 1];
+        _lagScratch = new double[_layout.ExogenousLags + 1];
         _cx = new double[regressorCount];
 
         _tailStride = 1 + regressorCount;
@@ -207,7 +207,7 @@ internal sealed class ArimaScan
                     // row keeps them lag-major so a shift by j is a block move.
                     _xWindows[i].CopyRow(_lagScratch);
 
-                    for (var lag = 0; lag <= _q; lag++)
+                    for (var lag = 0; lag <= _layout.ExogenousLags; lag++)
                     {
                         _row[_layout.Exogenous(lag, i)] = _lagScratch[lag];
                     }
@@ -234,7 +234,7 @@ internal sealed class ArimaScan
         _moments.Scale(lambda);
     }
 
-    private const int StateVersion = 1;
+    private const int StateVersion = 2;
 
     /// <summary>
     /// Writes the complete scan state — transforms, windows, accumulators, offsets, tail
@@ -255,6 +255,7 @@ internal sealed class ArimaScan
         writer.Write(_options.Seasonal.Period);
         writer.Write(_options.IncludeIntercept);
         writer.Write(_layout.LagDepth);
+        writer.Write(_layout.ExogenousLags);
         writer.Write(_r);
 
         _yTransform.WriteState(writer);
@@ -308,11 +309,12 @@ internal sealed class ArimaScan
         var period = reader.ReadInt32();
         var intercept = reader.ReadBoolean();
         var lagDepth = reader.ReadInt32();
+        var exogenousLags = reader.ReadInt32();
         var r = reader.ReadInt32();
 
         if (p != _p || d != _options.Order.D || q != _q || seasonalD != _options.Seasonal.D
             || period != _options.Seasonal.Period || intercept != _options.IncludeIntercept
-            || lagDepth != _layout.LagDepth || r != _r)
+            || lagDepth != _layout.LagDepth || exogenousLags != _layout.ExogenousLags || r != _r)
         {
             throw new InvalidDataException(
                 $"Saved state is for ARIMA({p},{d},{q}) seasonal ({seasonalD})[{period}], intercept {intercept}, " +
@@ -377,7 +379,8 @@ internal sealed class ArimaScan
         if (candidate.Order.P > _p || candidate.Order.Q > _q
             || candidate.Differencing != _options.Differencing
             || candidate.IncludeIntercept != _options.IncludeIntercept
-            || candidate.LagDepth > _layout.LagDepth)
+            || candidate.LjungBoxLags != _options.LjungBoxLags
+            || candidate.GramDepth > _layout.LagDepth)
         {
             throw new ArgumentException(
                 $"ARIMA{candidate.Order} is not a sub-problem of the scan built for ARIMA{_options.Order} " +
@@ -449,10 +452,32 @@ internal sealed class ArimaScan
         var stationary = PolynomialStability.IsStationary(hr.Phi, out var stationarityMargin);
         var invertible = PolynomialStability.IsInvertible(hr.Theta, out var invertibilityMargin);
 
+        // Ljung-Box on the second-stage residuals, from their exact autocovariances.
+        var lags = candidate.LjungBoxLags;
+        var residualAcf = new double[lags];
+        var ljungBox = double.NaN;
+        var ljungBoxDf = lags - p - q;
+        var ljungBoxP = double.NaN;
+
+        if (lags > 0 && hr.ResidualAutocovariances[0] > 0d)
+        {
+            var statistic = 0d;
+
+            for (var lag = 1; lag <= lags; lag++)
+            {
+                residualAcf[lag - 1] = hr.ResidualAutocovariances[lag] / hr.ResidualAutocovariances[0];
+                statistic += residualAcf[lag - 1] * residualAcf[lag - 1] / (n - lag);
+            }
+
+            ljungBox = n * (n + 2d) * statistic;
+            ljungBoxP = ljungBoxDf > 0 ? Statistics.ChiSquaredDistribution.SurvivalFunction(ljungBox, ljungBoxDf) : double.NaN;
+        }
+
         var diagnostics = new ArimaDiagnostics(
             n, k, hr.ResidualSumOfSquares, logLikelihood, aic, aicc, bic, hr.PilotOrder,
             stationary, stationarityMargin, invertible, invertibilityMargin,
-            isConstantSeries: false, hr.Solve);
+            isConstantSeries: false, hr.Solve,
+            lags, ljungBox, ljungBoxDf, ljungBoxP, residualAcf);
 
         var seed = new ForecastSeed(integration, regressorStates, RecentValues(p), RecentResiduals(hr, p, q));
 
@@ -483,7 +508,8 @@ internal sealed class ArimaScan
             _gram.Count, count + 1, 0d, double.NaN, double.NaN, double.NaN, double.NaN, 0,
             isStationary: true, stationarityMargin: 1d, isInvertible: true, invertibilityMargin: 1d,
             isConstantSeries: true,
-            new SolveDiagnostics { Dimension = count, Succeeded = true, FailedColumn = -1 });
+            new SolveDiagnostics { Dimension = count, Succeeded = true, FailedColumn = -1 },
+            candidate.LjungBoxLags, double.NaN, candidate.LjungBoxLags - p - q, double.NaN, new double[candidate.LjungBoxLags]);
 
         var seed = new ForecastSeed(integration, regressorStates, RecentValues(p), new double[q]);
 

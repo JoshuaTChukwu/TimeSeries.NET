@@ -203,7 +203,7 @@ public sealed class DbTimeSeriesSourceTests : IDisposable
         var model = new ArimaModel(new ArimaOptions { Order = new(1, 0, 0) });
 
         var results = new List<KeyedArimaFit>();
-        await foreach (var result in model.FitManyAsync(source))
+        await foreach (var result in model.FitManyAsync(source, FitManyOptions.Sequential))
         {
             results.Add(result);
         }

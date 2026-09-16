@@ -157,7 +157,8 @@ public class StatsmodelsReferenceTests
         var diagnostics = new ArimaDiagnostics(
             z.Length, p + q + r + 2, 0, 0, 0, 0, 0, 0,
             isStationary: true, stationarityMargin: 1, isInvertible: true, invertibilityMargin: 1,
-            isConstantSeries: false, new SolveDiagnostics { Succeeded = true, FailedColumn = -1 });
+            isConstantSeries: false, new SolveDiagnostics { Succeeded = true, FailedColumn = -1 },
+            0, double.NaN, 0, double.NaN, []);
 
         return new ArimaFit(
             options, c.Phi, c.Theta, c.Beta, c.Intercept, c.Sigma2, c.Series.Length,

@@ -8,7 +8,7 @@ namespace TimeSeries;
 public sealed partial class ArimaFit
 {
     private const string Magic = "TSAF";
-    private const int FormatVersion = 1;
+    private const int FormatVersion = 2;
 
     /// <summary>
     /// Writes the fit — coefficients, diagnostics, window and the bounded forecasting
@@ -39,6 +39,7 @@ public sealed partial class ArimaFit
         writer.Write(Options.Ridge);
         writer.Write(Options.ForgettingFactor);
         writer.Write(Options.Frequency.HasValue ? (int)Options.Frequency.Value : 0);
+        writer.Write(Options.LjungBoxLags);
 
         // Coefficients
         WriteArray(writer, _phi);
@@ -75,6 +76,11 @@ public sealed partial class ArimaFit
         writer.Write(d.Solve.Ridge);
         writer.Write(d.Solve.ColumnsScaled);
         writer.Write(d.Solve.FailedColumn);
+        writer.Write(d.LjungBoxLags);
+        writer.Write(d.LjungBoxStatistic);
+        writer.Write(d.LjungBoxDegreesOfFreedom);
+        writer.Write(d.LjungBoxPValue);
+        WriteArray(writer, d.ResidualAutocorrelations.ToArray());
 
         // Forecast seed
         WriteArray(writer, Seed.Integration.Tail.ToArray());
@@ -128,6 +134,7 @@ public sealed partial class ArimaFit
         var ridge = reader.ReadDouble();
         var forgetting = reader.ReadDouble();
         var frequency = reader.ReadInt32();
+        var optionLjungBoxLags = reader.ReadInt32();
 
         var options = new ArimaOptions
         {
@@ -139,6 +146,7 @@ public sealed partial class ArimaFit
             Ridge = ridge,
             ForgettingFactor = forgetting,
             Frequency = frequency == 0 ? null : (SeriesFrequency)frequency,
+            LjungBoxLags = optionLjungBoxLags,
         };
 
         var phi = ReadArray(reader);
@@ -175,9 +183,16 @@ public sealed partial class ArimaFit
             FailedColumn = reader.ReadInt32(),
         };
 
+        var ljungBoxLags = reader.ReadInt32();
+        var ljungBox = reader.ReadDouble();
+        var ljungBoxDf = reader.ReadInt32();
+        var ljungBoxP = reader.ReadDouble();
+        var residualAcf = ReadArray(reader);
+
         var diagnostics = new ArimaDiagnostics(
             effective, parameters, rss, logLikelihood, aic, aicc, bic, pilotOrder,
-            stationary, stationarityMargin, invertible, invertibilityMargin, constantSeries, solve);
+            stationary, stationarityMargin, invertible, invertibilityMargin, constantSeries, solve,
+            ljungBoxLags, ljungBox, ljungBoxDf, ljungBoxP, residualAcf);
 
         var spec = options.Differencing;
         var integration = new IntegrationState(spec, ReadArray(reader));
