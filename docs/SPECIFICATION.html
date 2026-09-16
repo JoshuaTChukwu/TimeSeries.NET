@@ -686,7 +686,7 @@ Console.WriteLine($<span class="c">"{next.Mean.Span[0]:F4}  [{next.Lower.Span[0]
 
         <div class="note">
           <span class="label">Design note — long horizons</span>
-          <p>An ARIMA point forecast converges to its drift line within a handful of steps. At a two- or three-year horizon the mean path is a straight line and carries almost no information; the interval width is the entire content of the forecast, and for <em>d</em> = 1 it grows roughly like <code>h<sup>3⁄2</sup></code>. Making intervals mandatory is therefore a correctness decision, not a convenience. The documentation must state this rather than let a consumer read a flat line as a confident prediction.</p>
+          <p>An ARIMA point forecast converges to its drift line within a handful of steps. At a two- or three-year horizon the mean path is a straight line and carries almost no information; the interval width is the entire content of the forecast, and for <em>d</em> = 1 it grows roughly like <code>√h</code>. Making intervals mandatory is therefore a correctness decision, not a convenience. The documentation must state this rather than let a consumer read a flat line as a confident prediction.</p>
         </div>
       </section>
 
@@ -709,7 +709,7 @@ Console.WriteLine($<span class="c">"{next.Mean.Span[0]:F4}  [{next.Lower.Span[0]
     <span class="k">public</span> ValueTask&lt;ArimaSelection&gt; SelectAsync(ITimeSeriesSource source, CancellationToken ct = <span class="k">default</span>);
 }</code></pre>
 
-        <p>Differencing order changes the series itself, so each <em>d</em> (and each seasonal candidate) needs its own transform and its own <code>G</code> — but those run side by side off a single cursor. With <code>MaxP = MaxQ = 5</code>, <code>m = 32</code> and three values of <em>d</em>, that is three matrices of 38 × 38, about 35 KB in total, to evaluate 108 candidate models on one scan.</p>
+        <p>Differencing order changes the series itself, so each <em>d</em> (and each seasonal candidate) needs its own transform and its own <code>G</code> — but those run side by side off a single cursor. With <code>MaxP = MaxQ = 5</code>, <code>m = 32</code> and three values of <em>d</em>, that is three matrices of 38 × 38, about 35 KB in total, to evaluate 108 candidate models on one scan.</p><p><strong>Amendment (M7).</strong> An information criterion cannot choose <em>d</em>: candidates at different differencing orders are fitted to different series, so their likelihoods are not comparable. <em>d</em> is chosen by a KPSS level-stationarity test on each candidate — accumulated in the same pass from three running sums and the autocovariances already kept — taking the smallest <em>d</em> not rejected, or the largest if all are. The criterion then ranks only (<em>p</em>,<em>q</em>) at that fixed <em>d</em>, where every candidate shares the same rows and the comparison is valid. Seasonal differencing is chosen by a documented autocorrelation heuristic pending a seasonal unit-root test.</p>
         <p>Pilot order <em>m</em> comes free from the same matrix: AR(<em>k</em>) for every <code>k ≤ MaxPilotOrder</code> is a nested submatrix of <code>G</code>, so its residual sum of squares — and therefore its AICc — is available without touching data. Choosing <em>m</em> stops being a guess.</p>
         <p><code>ArimaSelection</code> returns the winning <code>ArimaFit</code> plus the full ranked table of candidates with their criteria, so the choice is inspectable rather than opaque.</p>
       </section>

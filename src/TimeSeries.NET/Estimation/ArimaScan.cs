@@ -30,6 +30,9 @@ internal sealed class ArimaScan
     private readonly LagWindow[] _xWindows;
     private readonly LagGramAccumulator _gram;
     private readonly MomentsAccumulator _moments;
+    private readonly KpssAccumulator? _kpss;
+    private readonly LagWindow? _stationarityWindow;
+    private readonly double[] _stationarityRow;
     private readonly double[] _row;
     private readonly double[] _lagScratch;
     private readonly double[] _cx;
@@ -46,9 +49,17 @@ internal sealed class ArimaScan
     private double[] _columnScratch = [];
     private double[][] _xScratch = [];
 
-    internal ArimaScan(ArimaOptions options, int regressorCount)
+    internal ArimaScan(ArimaOptions options, int regressorCount, int stationarityLags = 0)
     {
         options.Validate();
+
+        if (stationarityLags > 0)
+        {
+            _kpss = new KpssAccumulator(stationarityLags);
+            _stationarityWindow = new LagWindow(stationarityLags);
+        }
+
+        _stationarityRow = new double[stationarityLags + 1];
 
         _options = options;
         _p = options.Order.P;
@@ -87,6 +98,12 @@ internal sealed class ArimaScan
 
     /// <summary>The Gram accumulator, exposed for the batch-invariance and merge tests.</summary>
     internal LagGramAccumulator Gram => _gram;
+
+    /// <summary>The KPSS result over the differenced series, when tracking was enabled.</summary>
+    internal KpssResult? Stationarity => _kpss?.Freeze();
+
+    /// <summary>The moments of the differenced series so far.</summary>
+    internal Moments Moments => _moments.Freeze();
 
     /// <summary>
     /// Folds one batch. Batches may be any length; a boundary is invisible to the result.
@@ -156,6 +173,13 @@ internal sealed class ArimaScan
             _yWindow.Push(shifted);
             _moments.Add(shifted);
 
+            if (_kpss is not null)
+            {
+                _stationarityWindow!.Push(shifted);
+                var available = _stationarityWindow.CopyRow(_stationarityRow);
+                _kpss.Add(_stationarityRow.AsSpan(0, available));
+            }
+
             var tailBase = _tailNext * _tailStride;
             _tail[tailBase] = shifted;
 
@@ -218,6 +242,11 @@ internal sealed class ArimaScan
     /// </summary>
     internal void WriteState(BinaryWriter writer)
     {
+        if (_kpss is not null)
+        {
+            throw new NotSupportedException("A scan tracking stationarity for order selection cannot be saved.");
+        }
+
         writer.Write(StateVersion);
         writer.Write(_p);
         writer.Write(_options.Order.D);
@@ -331,18 +360,42 @@ internal sealed class ArimaScan
         _differencedCount = reader.ReadInt64();
     }
 
-    /// <summary>Solves from the accumulated state. Touches no data.</summary>
-    internal ArimaFit Solve(FitWindow window)
+    /// <summary>Solves the scan's own model from the accumulated state. Touches no data.</summary>
+    internal ArimaFit Solve(FitWindow window) => Solve(_options, window);
+
+    /// <summary>
+    /// Solves a candidate model from the accumulated state. Any <c>(p, q)</c> no larger
+    /// than the scan's own is a sub-problem of the same matrix, which is what makes an
+    /// order search free after one pass: every candidate uses the same rows, so their
+    /// information criteria are comparable.
+    /// </summary>
+    /// <exception cref="ArgumentException">The candidate is not a sub-problem of this scan.</exception>
+    internal ArimaFit Solve(ArimaOptions candidate, FitWindow window)
     {
+        candidate.Validate();
+
+        if (candidate.Order.P > _p || candidate.Order.Q > _q
+            || candidate.Differencing != _options.Differencing
+            || candidate.IncludeIntercept != _options.IncludeIntercept
+            || candidate.LagDepth > _layout.LagDepth)
+        {
+            throw new ArgumentException(
+                $"ARIMA{candidate.Order} is not a sub-problem of the scan built for ARIMA{_options.Order} " +
+                $"(lag depth {_layout.LagDepth}, differencing {_options.Differencing}).",
+                nameof(candidate));
+        }
+
+        var p = candidate.Order.P;
+        var q = candidate.Order.Q;
         var lagDepth = _layout.LagDepth;
-        var required = lagDepth + (10L * (_p + _q + _r + 1));
+        var required = lagDepth + (10L * (p + q + _r + 1));
 
         if (_differencedCount < required)
         {
-            var spec = _options.Differencing;
+            var spec = candidate.Differencing;
             throw new InsufficientDataException(
                 required, _differencedCount,
-                $"ARIMA{_options.Order}{(spec.IsIdentity ? string.Empty : " with " + spec)} needs at least " +
+                $"ARIMA{candidate.Order}{(spec.IsIdentity ? string.Empty : " with " + spec)} needs at least " +
                 $"{required} observations after differencing — the lag depth {lagDepth} plus ten per " +
                 $"coefficient — and {_differencedCount} are available from {_rawCount} raw rows. " +
                 "Supply a longer series, or a lower order or MaxPilotOrder.");
@@ -360,11 +413,11 @@ internal sealed class ArimaScan
 
         if (moments.Maximum.Equals(moments.Minimum))
         {
-            return ConstantFit(moments, integration, regressorStates, window);
+            return ConstantFit(candidate, moments, integration, regressorStates, window);
         }
 
-        var solver = new NormalEquationSolver(ridge: _options.Ridge);
-        var hr = HannanRissanen.Solve(gram, _layout, _options, solver);
+        var solver = new NormalEquationSolver(ridge: candidate.Ridge);
+        var hr = HannanRissanen.Solve(gram, _layout, candidate, solver);
 
         // Un-shift the intercept: z - cz = c~ + sum phi (z - cz) + beta'(x - cx) + ...
         var intercept = hr.Intercept;
@@ -401,10 +454,10 @@ internal sealed class ArimaScan
             stationary, stationarityMargin, invertible, invertibilityMargin,
             isConstantSeries: false, hr.Solve);
 
-        var seed = new ForecastSeed(integration, regressorStates, RecentValues(), RecentResiduals(hr));
+        var seed = new ForecastSeed(integration, regressorStates, RecentValues(p), RecentResiduals(hr, p, q));
 
         return new ArimaFit(
-            _options, hr.Phi, hr.Theta, hr.Beta, intercept, sigma2, _rawCount,
+            candidate, hr.Phi, hr.Theta, hr.Beta, intercept, sigma2, _rawCount,
             diagnostics, window, hr.StandardErrors, seed);
     }
 
@@ -413,10 +466,12 @@ internal sealed class ArimaScan
     /// model, not a singular regression.
     /// </summary>
     private ArimaFit ConstantFit(
-        Moments moments, IntegrationState integration, IntegrationState[] regressorStates, FitWindow window)
+        ArimaOptions candidate, Moments moments, IntegrationState integration, IntegrationState[] regressorStates, FitWindow window)
     {
+        var p = candidate.Order.P;
+        var q = candidate.Order.Q;
         var intercept = _cz + moments.Minimum;
-        var count = (_options.IncludeIntercept ? 1 : 0) + _p + _q + _r;
+        var count = (candidate.IncludeIntercept ? 1 : 0) + p + q + _r;
         var standardErrors = new double[count];
 
         for (var i = 0; i < count; i++)
@@ -430,10 +485,10 @@ internal sealed class ArimaScan
             isConstantSeries: true,
             new SolveDiagnostics { Dimension = count, Succeeded = true, FailedColumn = -1 });
 
-        var seed = new ForecastSeed(integration, regressorStates, RecentValues(), new double[_q]);
+        var seed = new ForecastSeed(integration, regressorStates, RecentValues(p), new double[q]);
 
         return new ArimaFit(
-            _options, new double[_p], new double[_q], new double[_r], intercept, 0d, _rawCount,
+            candidate, new double[p], new double[q], new double[_r], intercept, 0d, _rawCount,
             diagnostics, window, standardErrors, seed);
     }
 
@@ -464,14 +519,14 @@ internal sealed class ArimaScan
     }
 
     /// <summary>The last <c>p</c> differenced values, back on the unshifted differenced scale.</summary>
-    private double[] RecentValues()
+    private double[] RecentValues(int p)
     {
-        var recent = new double[_p];
-        var take = Math.Min(_p, _tailCount);
+        var recent = new double[p];
+        var take = Math.Min(p, _tailCount);
 
         for (var i = 0; i < take; i++)
         {
-            recent[_p - take + i] = TailValue(_tailCount - take + i) + _cz;
+            recent[p - take + i] = TailValue(_tailCount - take + i) + _cz;
         }
 
         return recent;
@@ -482,18 +537,18 @@ internal sealed class ArimaScan
     /// tail: pilot residuals seed the recursion, and the fitted ARMA recursion then runs
     /// forward far enough for the seeding to have washed out.
     /// </summary>
-    private double[] RecentResiduals(HannanRissanen.Result hr)
+    private double[] RecentResiduals(HannanRissanen.Result hr, int p, int q)
     {
-        var residuals = new double[_q];
+        var residuals = new double[q];
 
-        if (_q == 0)
+        if (q == 0)
         {
             return residuals;
         }
 
         var m = hr.PilotOrder;
         var length = _tailCount;
-        var start = m + _q;
+        var start = m + q;
 
         if (length <= start)
         {
@@ -525,12 +580,12 @@ internal sealed class ArimaScan
         {
             var value = TailValue(t) - hr.Intercept;
 
-            for (var k = 1; k <= _p; k++)
+            for (var k = 1; k <= p; k++)
             {
                 value -= hr.Phi[k - 1] * TailValue(t - k);
             }
 
-            for (var j = 1; j <= _q; j++)
+            for (var j = 1; j <= q; j++)
             {
                 var previous = t - j >= start ? final[t - j] : pilot[t - j];
                 value -= hr.Theta[j - 1] * previous;
@@ -544,7 +599,7 @@ internal sealed class ArimaScan
             final[t] = value;
         }
 
-        Array.Copy(final, length - _q, residuals, 0, _q);
+        Array.Copy(final, length - q, residuals, 0, q);
         return residuals;
     }
 
